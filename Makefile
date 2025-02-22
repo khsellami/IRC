@@ -1,10 +1,10 @@
 CPP = c++
 
-CPPFLAGS = -Wall -Wextra -Werror 
+# CPPFLAGS = -Wall -Wextra -Werror 
 
 NAME = ircserv
 
-SRCS = ./src/main.cpp ./src/Client.cpp ./src/Server.cpp
+SRCS = ./src/main.cpp ./src/Client.cpp ./src/Server.cpp   ./src/commande.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
@@ -13,7 +13,7 @@ HEADERS = ./include/Server.hpp  ./include/Client.hpp  ./include/User.hpp
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	$(CPP) $(CPPFLAGS) -o $@ $^
+	$(CPP)  -o $@ $^
 
 %.o: %.cpp $(HEADERS)
 	$(CPP) $(CPPFLAGS) -c $< -o $@

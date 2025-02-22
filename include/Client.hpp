@@ -8,7 +8,15 @@
 #include <cstring>
 #include "Server.hpp"
 #include "User.hpp"
+#include <vector>
+#include <map> 
+#include <set>
+#include <sstream>
 const int MAX_CLIENTS = 20;
+
+
+
+
 class Server;
 class Client
 {
@@ -42,5 +50,13 @@ class Client
 		}
 
 };
-
+void handle_nick(int client_fd, std::istringstream &iss);
+void handle_user(int client_fd, std::istringstream &iss);
+void handle_join(int client_fd, std::istringstream &iss);
+void handle_privmsg(int client_fd, std::istringstream &iss);
+void handle_kick(int client_fd, std::istringstream &iss);
+void handle_join(int client_fd, std::istringstream &iss);
+void handle_invite(int client_fd, std::istringstream &iss);
+void handle_mode(int client_fd, std::istringstream &iss);
+void handle_topic(int client_fd, std::istringstream &iss);
 #endif

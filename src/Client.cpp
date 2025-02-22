@@ -3,9 +3,35 @@
 #include <cerrno>
 #include <cstring>
 #include <cstdio>
+#include<sstream>
 
 #include "../include/Server.hpp"
 #include "../include/Client.hpp"
+void parse_message(const std::string &message, int client_fd)
+{
+    std::istringstream iss(message);
+    std::string command;
+    iss >> command;  // Récupère la commande
+
+    if (command == "NICK")
+        handle_nick(client_fd, iss);
+    else if (command == "USER")
+        handle_user(client_fd, iss);
+    else if (command == "JOIN")
+        handle_join(client_fd, iss);
+    else if (command == "PRIVMSG")
+        handle_privmsg(client_fd, iss);
+    else if (command == "KICK")
+        handle_kick(client_fd, iss);
+    else if (command == "INVITE")
+        handle_invite(client_fd, iss);
+    else if (command == "TOPIC")
+        handle_topic(client_fd, iss);
+    else if (command == "MODE")
+        handle_mode(client_fd, iss);
+    else
+        send(client_fd, "Unknown command\n", 16, 0);
+}
 
 void Client::connect_client(Server &server)
 {
@@ -73,6 +99,7 @@ void Client::connect_client(Server &server)
 				std::cout << "the Client send the message : " << message << '\n';
 				// parse_message(message);//parse message
 				// handle_command(message);//handle command
+				parse_message(message, fds[i].fd);
 				}
 			}
 	}
