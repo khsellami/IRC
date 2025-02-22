@@ -1,24 +1,28 @@
-CXX = g++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98
+CPP = c++
 
-SRCS = main.cpp IRCServer.cpp
+CPPFLAGS = -Wall -Wextra -Werror 
+
+NAME = ircserv
+
+SRCS = ./src/main.cpp ./src/Client.cpp ./src/Server.cpp
+
 OBJS = $(SRCS:.cpp=.o)
 
-TARGET = ircserv
+HEADERS = ./include/Server.hpp  ./include/Client.hpp  ./include/User.hpp  
 
-all: $(TARGET)
+all: $(NAME)
 
-$(TARGET): $(OBJS)
-	$(CXX) $(OBJS) -o $(TARGET)
+$(NAME): $(OBJS)
+	$(CPP) $(CPPFLAGS) -o $@ $^
 
-.cpp.o:
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+%.o: %.cpp $(HEADERS)
+	$(CPP) $(CPPFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJS)
+	rm -f $(OBJS) $(NAME)
 
 fclean: clean
-	rm -f $(TARGET)
+	rm -f $(NAME)
 
 re: fclean all
 
