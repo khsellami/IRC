@@ -6,35 +6,17 @@
 #include<sstream>
 
 #include "../include/Server.hpp"
-#include "../include/Client.hpp"
-void parse_message(const std::string &message, int client_fd)
-{
-    std::istringstream iss(message);
-    std::string command;
-    iss >> command;  // Récupère la commande
+#include "../include/User.hpp"
 
-    if (command == "NICK")
-        handle_nick(client_fd, iss);
-    else if (command == "USER")
-        handle_user(client_fd, iss);
-    else if (command == "JOIN")
-        handle_join(client_fd, iss);
-    else if (command == "PRIVMSG")
-        handle_privmsg(client_fd, iss);
-    else if (command == "KICK")
-        handle_kick(client_fd, iss);
-    else if (command == "INVITE")
-        handle_invite(client_fd, iss);
-    else if (command == "TOPIC")
-        handle_topic(client_fd, iss);
-    else if (command == "MODE")
-        handle_mode(client_fd, iss);
-    else
-        send(client_fd, "Unknown command\n", 16, 0);
+User::User()
+{
+	auth = false;
+	auth_count = 0;
 }
 
-void Client::connect_client(Server &server)
+void User::connect_client(Server &server)
 {
+	struct pollfd fds[MAX_CLIENTS + 1];
 
 	fds[0].fd = server.getSock();
 	fds[0].events = POLLIN;
@@ -60,7 +42,7 @@ void Client::connect_client(Server &server)
 				int clientSocket = accept(server.getSock(), (struct sockaddr *)&clientAddress, &clientAddressLength);
 				user.setSocket(clientSocket);
 				user.setHost(inet_ntoa(clientAddress.sin_addr));
-				fillUsers(user);
+				// fillUsers(user);
 				if (clientSocket != -1)
 				{
 					numClients++;
@@ -77,6 +59,7 @@ void Client::connect_client(Server &server)
 		{
 			if (fds[i].revents & POLLIN)
 			{
+				
 				char buffer[1024];
 				ssize_t bytesRead = recv(fds[i].fd, buffer, sizeof(buffer) - 1, 0);	
 				if (bytesRead == -1)
@@ -97,10 +80,13 @@ void Client::connect_client(Server &server)
 				buffer[bytesRead] = '\0';
 				std::string message(buffer);
 				std::cout << "the Client send the message : " << message << '\n';
+				//if (!auth && !(auth_command`PASS || User || NICK`)) --> complete Auth first!
 				// parse_message(message);//parse message
 				// handle_command(message);//handle command
-				parse_message(message, fds[i].fd);
-				}
+				// parse_message(message, fds[i].fd);
+				//1. parse and check Authentication of the client (splite and check booliens : PASS && USER && NICKName).
+				// if the boolean was true, then the commands will executed. otherwise just Quit command can executed.
 			}
+		}
 	}
 }

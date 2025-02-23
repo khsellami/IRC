@@ -17,10 +17,12 @@
 #include <cerrno>
 #include <cstring>
 
-#include "Client.hpp"
-
-class Client;
+// #include "Client.hpp"
+#include "Server.hpp"
+#include <vector>
+// class Client;
 class User;
+class Server;
 
 class Server
 {

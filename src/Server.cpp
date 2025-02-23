@@ -1,5 +1,5 @@
 #include "../include/Server.hpp"
-
+#include "../include/User.hpp"
 void	Server::run()
 {
 	int opt = 1;
@@ -14,7 +14,8 @@ void	Server::run()
 		close(serverSocket);
 		exit(1);
 	}
-	if (fcntl(serverSocket, F_SETFL, O_NONBLOCK) == -1) {
+	if (fcntl(serverSocket, F_SETFL, O_NONBLOCK) == -1) 
+	{
 		perror("fcntl");
 		close(serverSocket);
 		exit(1);
