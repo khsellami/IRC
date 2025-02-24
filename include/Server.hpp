@@ -20,7 +20,7 @@ class Server
 		//containers client authentifiees
 		std::map<int , Client> clients;
 		//container channel existant in the server
-		std::vector<Channel> channels;
+		std::map<std::string, Channel> channels;
 
 	public:
 		void	run();

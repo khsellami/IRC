@@ -1,5 +1,6 @@
 #include "../include/Server.hpp"
 #include "../include/Client.hpp"
+#include "../include/Msj.hpp"
 
 
 Server::Server(int port, const char* password)
@@ -52,6 +53,42 @@ void	Server::run()
 	}
 	std::cout << "Server is listening on port " << port << '\n';
 }
+
+std::string getCommand(const std::string &msg)
+{
+    return msg.substr(0, msg.find(" "));
+}
+
+std::string getArgument(const std::string &msg)
+{
+    size_t pos = msg.find(" ");
+    return (pos != std::string::npos) ? msg.substr(pos + 1) : "";
+}
+
+#include <algorithm>
+
+std::string toUpper(const std::string &str)
+{
+    std::string upperStr = str;
+    std::transform(upperStr.begin(), upperStr.end(), upperStr.begin(), ::toupper);
+    return upperStr;
+}
+void parse_message(const std::string &msg, Client &client)
+{
+	Msj msj;
+	(void)client;
+    std::cout << "The message is: " << msg << '\n';
+    
+    std::string command = getCommand(msg);
+    std::string argument = getArgument(msg);
+	std::string CMD = toUpper(command);
+	// if(CMD == "JOIN")
+	// 	handle_join(client, argument);
+
+	msj.setCommand(CMD);
+	msj.setArgument(argument);
+}
+
 
 void handle_authentification(Client &client, std::string message)
 {
@@ -142,7 +179,7 @@ void Server::connect_client(Server &server)
 					handle_authentification(clients[fds[i].fd], message);
 					//if the client is authentificate
 					// if (client.getIs_auth() == true)
-						// parse_message(clients[fds[i].fd], message);
+					parse_message(message, clients[fds[i].fd]);
 				}
 			}
 		}
