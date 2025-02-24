@@ -35,21 +35,37 @@ class Msj
 		std::vector<std::string> getArgs(){
 			return this->args;
 		}
-		void SetArgs(std::string args){
+		void SetArgs(std::string args) {
+			this->args.clear(); // Clear previous args
 			std::string arg;
-			for (size_t i = 0; i < args.length(); i++)
-			{
-				if(args[i] == ' ')
-				{
-					this->args.push_back(arg);
-					arg = "";
+			size_t pos = 0;
+			bool messageFound = false;
+
+			while (pos < args.length()) {
+				if (args[pos] == ':') {
+					// The remaining part is the message
+					this->message = args.substr(pos + 1);
+					messageFound = true;
+					break;
+				} 
+				else if (args[pos] == ' ') {
+					if (!arg.empty()) {
+						this->args.push_back(arg);
+						arg.clear();
+					}
+				} 
+				else {
+					arg += args[pos];
 				}
-				else
-				{
-					arg += args[i];
-				}
+				pos++;
 			}
-			this->args.push_back(arg);
+
+			if (!arg.empty() && !messageFound) {
+				this->args.push_back(arg);
+			}
+		}
+		std::string get_message(){
+			return this->message;
 		}
 		// void print_Msj(std::string Msj);
 		

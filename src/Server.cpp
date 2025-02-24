@@ -80,44 +80,41 @@ std::string trim(const std::string &str)
     size_t last = str.find_last_not_of(" \t");
     return str.substr(first, last - first + 1);
 }
+std::string geting_message(const std::string &msg)
+{
+    size_t pos = msg.find(":");
+    return (pos != std::string::npos) ? msg.substr(pos + 1) : "";
+}
+
 void parse_message(const std::string &msg1, Client &client)
 {
-	Msj msj;
-	(void)client;
-	std::string msg = trim(msg1);
+    Msj msj;
+    (void)client;
+    std::string msg = trim(msg1);
     std::cout << "The message is: " << msg << '\n';
-    
+
     std::string command = getCommand(msg);
     std::string argument = getArgument(msg);
-	std::string CMD = toUpper(command);
-	// if(CMD == "JOIN")
-	// 	handle_join(client, argument);
 
-	msj.setCommand(CMD);
-	msj.setArgument(argument);
-	if(msj.getCommand() == "JOIN")
-	{
-		std::cout << "The command is: " << msj.getCommand() << '\n';
-		std::cout << "The argument is: " << msj.getArgument() << '\n';
-	}
-	msj.SetArgs(argument);
-	for (size_t i = 0; i < msj.getArgs().size(); i++)
-	{
-		std::cout << "The args are: " << msj.getArgs()[i] << '\n';
-	}
-	// if(CMD == "NICK")
-	// 	handle_nick(client, argument);
-	// if(CMD == "USER")
-	// 	handle_user(client, argument);
-	// if(CMD == "PRIVMSG")
-	// 	handle_privmsg(client, argument);
-	// if(CMD == "QUIT")
-	// 	handle_quit(client, argument);
-	// if(CMD == "TOPIC")
-	// 	handle_topic(client, argument);
-	// if(CMD == "INVITE")
-	// 	handle_invite(client, argument);
-	
+    std::string CMD = toUpper(command);
+    msj.setCommand(CMD);
+    msj.setArgument(argument);
+
+    msj.SetArgs(argument); // Parse and store args + message
+
+    std::cout << "Command: " << msj.getCommand() << '\n';
+    std::cout << "Arguments:\n";
+    for (size_t i = 0; i < msj.getArgs().size(); i++)
+    {
+        std::cout << "[" << msj.getArgs()[i] << "]\n";
+    }
+    std::cout << "Message: " << msj.get_message() << '\n';
+
+    if (CMD == "JOIN")
+    {
+        std::cout << "Handling JOIN command...\n";
+        // handle_join(client, argument);
+    }
 }
 
 
