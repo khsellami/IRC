@@ -1,5 +1,5 @@
 #include "../include/Server.hpp"
-#include "../include/User.hpp"
+#include "../include/Client.hpp"
 void	Server::run()
 {
 	int opt = 1;
@@ -29,7 +29,7 @@ void	Server::run()
 		close(serverSocket);
 		exit(1);
     }
-    if (listen(serverSocket, MAX_CLIENTS) == -1) {
+    if (listen(serverSocket, SOMAXCONN) == -1) {
     	perror("listen");
     	close(serverSocket);
     	exit(1);

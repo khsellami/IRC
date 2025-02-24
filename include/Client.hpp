@@ -1,30 +1,27 @@
-#ifndef USER_HPP
-#define USER_HPP
+#ifndef Client_HPP
+#define Client_HPP
 #include <iostream>
-const int MAX_CLIENTS = 20;
-class User 
+
+class Client 
 {
 private:
     int         fd;
     std::string host;
     std::string nickname;
-    std::string username;
-    int     numClients;
+    std::string Clientname;
     bool     auth;
-    int      
-    auth_count;
+    int      auth_count;
 
 public:
-    User();
+    Client();
 
     void setSocket(int fd) { this->fd = fd; }
     void setHost(const std::string &host) { this->host = host; }
     void setNickname(const std::string &nickname) { this->nickname = nickname; }
-    void setUsername(const std::string &username) { this->username = username; }
+    void setClientname(const std::string &Clientname) { this->Clientname = Clientname; }
 
     std::string getNickname() const { return nickname; }
-    std::string getUsername() const { return username; }
-    void connect_client(Server &server);
+    std::string getClientname() const { return Clientname; }
 };
 
 

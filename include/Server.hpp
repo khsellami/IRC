@@ -1,7 +1,7 @@
 #ifndef Server_HPP
 #define Server_HPP
-#include <cstdio>
 
+#include <cstdio>
 #include <iostream>
 #include <vector>
 #include <cstring>
@@ -16,13 +16,8 @@
 #include <iostream>
 #include <cerrno>
 #include <cstring>
-
-// #include "Client.hpp"
 #include "Server.hpp"
 #include <vector>
-// class Client;
-class User;
-class Server;
 
 class Server
 {
@@ -30,6 +25,7 @@ class Server
 		int 		port;
 		int			serverSocket;
 		const char* password;
+		std::vector<struct pollfd > fds;
 
 	public:
 		void	run();
@@ -43,7 +39,8 @@ class Server
 		int getSock() const
 		{
 			return serverSocket;
-		}	
+		}
+		void connect_client(Server &server);	
 };
 
 #endif

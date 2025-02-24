@@ -8,7 +8,7 @@ SRCS = ./src/main.cpp ./src/Client.cpp ./src/Server.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
-HEADERS = ./include/Server.hpp    ./include/User.hpp  
+HEADERS = ./include/Server.hpp    ./include/Client.hpp  
 
 all: $(NAME)
 
