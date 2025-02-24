@@ -1,23 +1,14 @@
 #ifndef Server_HPP
 #define Server_HPP
 
-#include <cstdio>
-#include <iostream>
-#include <vector>
-#include <cstring>
 #include <poll.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <signal.h>
-#include <ctime>
 #include <fcntl.h>
-#include <iostream>
-#include <cerrno>
-#include <cstring>
+#include <map>
 #include "Server.hpp"
-#include <vector>
+#include "Client.hpp"
+#include "Channel.hpp"
 
 class Server
 {
@@ -26,21 +17,17 @@ class Server
 		int			serverSocket;
 		const char* password;
 		std::vector<struct pollfd > fds;
+		//containers client authentifiees
+		std::map<int , Client> clients;
+		//container channel existant in the server
+		std::vector<Channel> channels;
 
 	public:
 		void	run();
-
-		Server(int port, const char* password)
-		{
-			this->port = port;
-			this->password = password;
-		}
-
-		int getSock() const
-		{
-			return serverSocket;
-		}
+		Server(int port, const char* password);
+		int getSock() const;
 		void connect_client(Server &server);	
 };
 
 #endif
+
