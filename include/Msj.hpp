@@ -24,6 +24,12 @@ class Msj
 		void setArgument(std::string argument){
 			this->argument = argument;
 		}
+		std::string getCommand(){
+			return this->command;
+		}
+		std::string getArgument(){
+			return this->argument;
+		}
 		// void print_Msj(std::string Msj);
 		
 

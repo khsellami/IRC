@@ -87,6 +87,23 @@ void parse_message(const std::string &msg, Client &client)
 
 	msj.setCommand(CMD);
 	msj.setArgument(argument);
+	if(msj.getCommand() == "JOIN")
+	{
+		std::cout << "The command is: " << msj.getCommand() << '\n';
+		std::cout << "The argument is: " << msj.getArgument() << '\n';
+	}
+	// if(CMD == "NICK")
+	// 	handle_nick(client, argument);
+	// if(CMD == "USER")
+	// 	handle_user(client, argument);
+	// if(CMD == "PRIVMSG")
+	// 	handle_privmsg(client, argument);
+	// if(CMD == "QUIT")
+	// 	handle_quit(client, argument);
+	// if(CMD == "TOPIC")
+	// 	handle_topic(client, argument);
+	// if(CMD == "INVITE")
+	// 	handle_invite(client, argument);
 }
 
 
