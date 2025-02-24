@@ -139,13 +139,13 @@ void Server::connect_client(Server &server)
 				std::cout << "Client " << fds[i].fd << " sent: " << message << '\n';
 				//handle authentification and add the client to the server container
 				// Use map lookup instead of looping over a vector
-				if (clients.find(fds[i].fd) != clients.end())
-				{
-					handle_authentification(clients[fds[i].fd], message);
+				// if (clients.find(fds[i].fd) != clients.end())
+				// {
+					// handle_authentification(clients[fds[i].fd], message);
 					//if the client is authentificate
 					// if (client.getIs_auth() == true)
-					parse_message(message, clients[fds[i].fd], clients, channels);
-				}
+				parse_message(message, clients[fds[i].fd], clients, channels);
+				//}
 			}
 		}
 	}

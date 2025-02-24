@@ -2,6 +2,14 @@
 #include "../include/Server.hpp"
 #include "../include/Client.hpp"
 #include "../include/Msj.hpp"
+
+
+void handle_join(Client &client, std::string argument)
+{
+	(void)client;
+	(void)argument;
+	std::cout << "Join command" << '\n';
+}
 std::string getCommand(const std::string &msg)
 {
     return msg.substr(0, msg.find(" "));
@@ -35,10 +43,10 @@ void parse_message(const std::string &msg1, Client &client, std::map<int , Clien
 	(void)clients;
 	(void)channels;
 
-
+	std::cout << "Enter here with the message : " << msg1 << '\n';
 	Msj msj;
 	std::string msg = trim(msg1);
-    std::cout << "The message is: " << msg << '\n';
+    // std::cout << "The message is: ----->" << msg << '\n';
     
     std::string command;
 	std::istringstream stream(msg);
@@ -48,14 +56,17 @@ void parse_message(const std::string &msg1, Client &client, std::map<int , Clien
 	std::string arg;
 	while (std::getline(stream >> std::ws, arg, ' '))
 	{
+		arg.erase(std::remove(arg.begin(), arg.end(), '\n'), arg.end()); 
 		msj.args.push_back(arg);
 	}
-	std::cout << "Command is " << msj.getCommand() << '\n';
-	std::cout << "Arguments: ";
+	std::cout << "Command is ------>" << msj.getCommand() << '\n';
+	std::cout << "Arguments: ------>";
 	for (size_t i = 0; i < msj.args.size(); ++i) {
-		std::cout << "[" << msj.args[i] << "] ";
+		std::cout << "[" << msj.args[i] << "]";
 	}
-	// std::cout << '\n';
+	std::cout << '\n';
+	// if(CMD == "JOIN")
+	// 	handle_join(client, argument);
 	// if(CMD == "NICK")
 	// 	handle_nick(client, argument);
 	// if(CMD == "USER")

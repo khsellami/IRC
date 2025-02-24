@@ -2,12 +2,11 @@
 #define Msj_HPP
 
 #include <iostream>
-#include <vector> // Add this line
+#include <vector>
 
 class Msj
 {   
 	private:
-		// std::string Msj;
 		std::string command;
 		std::string argument;
 		std::string channel_name;
