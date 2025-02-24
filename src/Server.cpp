@@ -73,10 +73,18 @@ std::string toUpper(const std::string &str)
     std::transform(upperStr.begin(), upperStr.end(), upperStr.begin(), ::toupper);
     return upperStr;
 }
-void parse_message(const std::string &msg, Client &client)
+std::string trim(const std::string &str)
+{
+    size_t first = str.find_first_not_of(" \t");
+    if (first == std::string::npos) return "";
+    size_t last = str.find_last_not_of(" \t");
+    return str.substr(first, last - first + 1);
+}
+void parse_message(const std::string &msg1, Client &client)
 {
 	Msj msj;
 	(void)client;
+	std::string msg = trim(msg1);
     std::cout << "The message is: " << msg << '\n';
     
     std::string command = getCommand(msg);
@@ -117,8 +125,9 @@ void handle_authentification(Client &client, std::string message)
 {
 	//check if pass is the first commande then terminate
 	//handle nick user
+	(void)message;
 	std::cout << "Authenticating client: " << client.getSocket() << '\n';
-	std::cout << "The message is : " << message << '\n';
+	// std::cout << "The message is : " << message << '\n';
 	//make the bool is_auth true after authentification success
 
 }
