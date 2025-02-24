@@ -17,10 +17,14 @@ class Client
 		// bool is_op;
 	public:
 		Client();
+
 		void setSocket(int fd);
 		void setHost(const std::string &host);
 		int getSocket();
 		int getIs_auth();
+		std::string getName(){
+			return this->nickname;
+		}
 };
 
 #endif

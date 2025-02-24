@@ -9,6 +9,7 @@
 #include "Server.hpp"
 #include "Client.hpp"
 #include "Channel.hpp"
+#include "Msj.hpp"
 
 class Server
 {
@@ -23,11 +24,20 @@ class Server
 		std::map<std::string, Channel> channels;
 
 	public:
+		Server(){
+			port = 0;
+			serverSocket = 0;
+			password = nullptr;
+		}
+		std::map<std::string, Channel> getChannels() const{
+			return channels;
+		}
 		void	run();
 		Server(int port, const char* password);
 		int getSock() const;
 		void connect_client(Server &server);	
 };
-
+void parse_message(const std::string &msg1, Client &client);
+void handle_join(Client &client, Msj &msj);
 #endif
 
