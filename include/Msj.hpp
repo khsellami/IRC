@@ -12,8 +12,8 @@ class Msj
 		std::string argument;
 		std::string channel_name;
 		std::string message;
-		std::vector<std::string> args;
 	public:
+		std::vector<std::string> args;
 		Msj(){
 			this->command = "";
 			this->argument = "";

@@ -54,73 +54,6 @@ void	Server::run()
 	std::cout << "Server is listening on port " << port << '\n';
 }
 
-std::string getCommand(const std::string &msg)
-{
-    return msg.substr(0, msg.find(" "));
-}
-
-std::string getArgument(const std::string &msg)
-{
-    size_t pos = msg.find(" ");
-    return (pos != std::string::npos) ? msg.substr(pos + 1) : "";
-}
-
-#include <algorithm>
-
-std::string toUpper(const std::string &str)
-{
-    std::string upperStr = str;
-    std::transform(upperStr.begin(), upperStr.end(), upperStr.begin(), ::toupper);
-    return upperStr;
-}
-std::string trim(const std::string &str)
-{
-    size_t first = str.find_first_not_of(" \t");
-    if (first == std::string::npos) return "";
-    size_t last = str.find_last_not_of(" \t");
-    return str.substr(first, last - first + 1);
-}
-void parse_message(const std::string &msg1, Client &client)
-{
-	Msj msj;
-	(void)client;
-	std::string msg = trim(msg1);
-    std::cout << "The message is: " << msg << '\n';
-    
-    std::string command = getCommand(msg);
-    std::string argument = getArgument(msg);
-	std::string CMD = toUpper(command);
-	// if(CMD == "JOIN")
-	// 	handle_join(client, argument);
-
-	msj.setCommand(CMD);
-	msj.setArgument(argument);
-	if(msj.getCommand() == "JOIN")
-	{
-		std::cout << "The command is: " << msj.getCommand() << '\n';
-		std::cout << "The argument is: " << msj.getArgument() << '\n';
-	}
-	msj.SetArgs(argument);
-	for (size_t i = 0; i < msj.getArgs().size(); i++)
-	{
-		std::cout << "The args are: " << msj.getArgs()[i] << '\n';
-	}
-	// if(CMD == "NICK")
-	// 	handle_nick(client, argument);
-	// if(CMD == "USER")
-	// 	handle_user(client, argument);
-	// if(CMD == "PRIVMSG")
-	// 	handle_privmsg(client, argument);
-	// if(CMD == "QUIT")
-	// 	handle_quit(client, argument);
-	// if(CMD == "TOPIC")
-	// 	handle_topic(client, argument);
-	// if(CMD == "INVITE")
-	// 	handle_invite(client, argument);
-	
-}
-
-
 void handle_authentification(Client &client, std::string message)
 {
 	//check if pass is the first commande then terminate
@@ -211,7 +144,7 @@ void Server::connect_client(Server &server)
 					handle_authentification(clients[fds[i].fd], message);
 					//if the client is authentificate
 					// if (client.getIs_auth() == true)
-					parse_message(message, clients[fds[i].fd]);
+					parse_message(message, clients[fds[i].fd], clients, channels);
 				}
 			}
 		}

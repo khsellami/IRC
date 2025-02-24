@@ -29,5 +29,7 @@ class Server
 		void connect_client(Server &server);	
 };
 
+void parse_message(const std::string &msg1, Client &client, std::map<int , Client> clients, std::map<std::string, Channel> channels);
+
 #endif
 
