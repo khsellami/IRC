@@ -92,6 +92,11 @@ void parse_message(const std::string &msg, Client &client)
 		std::cout << "The command is: " << msj.getCommand() << '\n';
 		std::cout << "The argument is: " << msj.getArgument() << '\n';
 	}
+	msj.SetArgs(argument);
+	for (size_t i = 0; i < msj.getArgs().size(); i++)
+	{
+		std::cout << "The args are: " << msj.getArgs()[i] << '\n';
+	}
 	// if(CMD == "NICK")
 	// 	handle_nick(client, argument);
 	// if(CMD == "USER")
@@ -104,6 +109,7 @@ void parse_message(const std::string &msg, Client &client)
 	// 	handle_topic(client, argument);
 	// if(CMD == "INVITE")
 	// 	handle_invite(client, argument);
+	
 }
 
 
