@@ -2,18 +2,16 @@
 #define Msj_HPP
 
 #include <iostream>
-#include <vector> // Add this line
+#include <vector>
 #include <sstream>
 
 class Msj
-{   
-	private:
-		std::string command;
-		std::string argument;
-		std::string channel_name;
-		std::string message;
+{
 	public:
 		std::vector<std::string> args;
+<<<<<<< HEAD
+		Msj();
+=======
 		Msj(){
 			this->command = "";
 			this->argument = "";
@@ -94,6 +92,7 @@ void SetArgs(const std::string& args) {
     }
 }
 
+>>>>>>> 2aaf91b3135d0bc464fdbe2f564e6bc7dedd5b4c
 };
 
 #endif

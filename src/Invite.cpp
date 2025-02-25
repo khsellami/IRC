@@ -9,13 +9,13 @@
 
 void handle_invite(Server &server, Client &client, Msj &msj)
 {
-    if (msj.getArgs().size() < 2) { 
+    if (msj.args[1].size() < 2) { 
         std::cerr << "Error: Channel name and client to invite required!\n";
         return;
     }
 
-    std::string channel_name = msj.getArgs()[0];
-    std::string target_client_name = msj.getArgs()[1];
+    std::string channel_name = msj.args[1];
+    std::string target_client_name = msj.args[2];
 
     // Validate that the channel name starts with '#'
     // if (channel_name.empty() || channel_name[0] != '#') {

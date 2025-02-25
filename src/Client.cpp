@@ -52,3 +52,9 @@ void Client::setUserName(std::string User)
 {
 	username = User;
 }
+
+std::string Client::getName(){
+	return this->nickname;
+}
+
+bool Client::isOp(){return is_op;}

@@ -18,40 +18,28 @@ class Server
 		int			serverSocket;
 		const char* password;
 		std::vector<struct pollfd > fds;
-		//containers client authentifiees
 		std::map<int , Client> clients;
-		//container channel existant in the server
 		std::map<std::string, Channel> channels;
 
 	public:
-		Server(){
-			port = 0;
-			serverSocket = 0;
-			password = nullptr;
-		}
-		std::map<std::string, Channel> getChannels() const{
-			return channels;
-		}
-		void addChannel(std::string name, Channel channel){
-			channels[name] = channel;
-		}
-		Client* getClientByName(const std::string &name) {
-			for (size_t i = 0; i < clients.size(); i++) {
-				if (clients[i].getName() == name) {
-					return &clients[i];
-				}
-			}
-			return NULL;
-		}
+		Server();
 		void	run();
 		Server(int port, const char* password);
 		int getSock() const;
-		void connect_client(Server &server);	
+		void connect_client(Server &server);
+		std::map<std::string, Channel> getChannels() const;
+		void addChannel(std::string name, Channel channel);
+		Client* getClientByName(const std::string &name);
 };
+<<<<<<< HEAD
+=======
 void handle_authentification(Client &client, std::string password, Msj msj, std::map<int , Client> clients);
+>>>>>>> 2aaf91b3135d0bc464fdbe2f564e6bc7dedd5b4c
 
-void parse_message(const std::string &msg1, Client &client, const char* password, std::map<int , Client> clients, Server &server);
+void parse_message(const std::string &msg1, Client &client, const char* password, std::map<int , Client> clients, Server &server, std::map<std::string, Channel> channels);
+void handle_topic(Server &server, Client &client,std::map<int , Client> clients, Msj msj, std::string msg, std::map<std::string, Channel> channels);
 void handle_join(Server &server, Client &client, Msj &msj);
 void handle_invite(Server &server, Client &client, Msj &msj);
+void handle_authentification(Client &client, std::string password, Msj msj, std::map<int , Client> clients);
 #endif
 

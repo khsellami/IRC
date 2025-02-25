@@ -1,21 +1,10 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   auth.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: hmraizik <hmraizik@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/02/24 11:50:06 by hmraizik          #+#    #+#             */
-/*   Updated: 2025/02/25 15:09:25 by hmraizik         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #include "../include/Client.hpp"
 #include "../include/Server.hpp"
 #include <sstream>
 
 void  check_Password(Client& client, std::string password, Msj command){
-    if (command.getCommand() == "PASS" && command.args[0] == password){
+    if (command.args[0] == "PASS" && command.args[0] == password){
         client.is_PASS = true;
         std::cout << "PASSWORD verified!!\n";
     }
@@ -31,7 +20,7 @@ bool check_Dupplicated(){
 }
 
 void check_Names(Client& client, Msj command){
-    if (command.getCommand() == "USER")
+    if (command.args[0] == "USER")
     {
         if (client.is_USER)
         {
@@ -41,7 +30,7 @@ void check_Names(Client& client, Msj command){
         client.setUserName(command.args[1]);
         client.is_USER = true;
     }
-    if (command.getCommand() == "NICK")
+    if (command.args[0] == "NICK")
     {
         if (!check_Dupplicated())
         {
@@ -74,7 +63,7 @@ void handle_authentification(Client &client, std::string password, Msj msj, std:
     
     if (client.getIs_auth())
     {
-        if (msj.getCommand() == "PASS" || msj.getCommand() == "USER")
+        if (msj.args[0] == "PASS" || msj.args[0] == "USER")
         {
             //throw: `You are already connected and cannot handshake again`;
             return ;
@@ -84,7 +73,7 @@ void handle_authentification(Client &client, std::string password, Msj msj, std:
     
     /****** trying a command before authentification *************************/
 
-    if (msj.getCommand() != "PASS" && msj.getCommand() != "NICK" && msj.getCommand() != "USER")
+    if (msj.args[0] != "PASS" && msj.args[0] != "NICK" && msj.args[0] != "USER")
     {
         if (client.getIs_auth() == false)
         {
@@ -111,7 +100,7 @@ void handle_authentification(Client &client, std::string password, Msj msj, std:
         return ;
     }
 
-    if (!(client.getIs_auth()) && msj.getCommand() == "PASS")
+    if (!(client.getIs_auth()) && msj.args[0] == "PASS")
     {
         check_Password(client, password, msj);
         return ;
