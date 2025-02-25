@@ -2,7 +2,6 @@
 #include "../include/Client.hpp"
 #include "../include/Msj.hpp"
 
-
 Server::Server(int port, const char* password)
 {
 	this->port = port;
@@ -53,18 +52,6 @@ void	Server::run()
 	}
 	std::cout << "Server is listening on port " << port << '\n';
 }
-
-void handle_authentification(Client &client, std::string message)
-{
-	//check if pass is the first commande then terminate
-	//handle nick user
-	(void)message;
-	std::cout << "Authenticating client: " << client.getSocket() << '\n';
-	// std::cout << "The message is : " << message << '\n';
-	//make the bool is_auth true after authentification success
-
-}
-
 
 void Server::connect_client(Server &server)
 {
@@ -141,10 +128,9 @@ void Server::connect_client(Server &server)
 				// Use map lookup instead of looping over a vector
 				// if (clients.find(fds[i].fd) != clients.end())
 				// {
-					// handle_authentification(clients[fds[i].fd], message);
 					//if the client is authentificate
 					// if (client.getIs_auth() == true)
-				parse_message(message, clients[fds[i].fd], clients, channels);
+				parse_message(message, clients[fds[i].fd], clients, channels, password);
 				//}
 			}
 		}

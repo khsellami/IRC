@@ -11,6 +11,9 @@
 Client::Client()
 {
 	is_auth = false;
+	is_PASS = false;
+	is_NICK = false;
+	is_USER = false;
 }
 
 void Client::setSocket(int fd)
@@ -28,7 +31,23 @@ int Client::getSocket()
 	return fd;
 }
 
-int Client::getIs_auth()
+bool Client::getIs_auth()
 {
 	return is_auth;
+}
+void Client::setIs_auth(bool value)
+{
+	is_auth = value;
+}
+void Client::setNickName(std::string Nick)
+{
+	nickname = Nick;
+}
+std::string Client::getNickName()
+{
+	return nickname;
+}
+void Client::setUserName(std::string User)
+{
+	username = User;
 }

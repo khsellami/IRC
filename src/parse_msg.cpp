@@ -37,7 +37,7 @@ std::string trim(const std::string &str)
     return str.substr(first, last - first + 1);
 }
 
-void parse_message(const std::string &msg1, Client &client, std::map<int , Client> clients, std::map<std::string, Channel> channels)
+void parse_message(const std::string &msg1, Client &client, std::map<int , Client> clients, std::map<std::string, Channel> channels, const char* password)
 {
 	(void)client;
 	(void)clients;
@@ -65,6 +65,7 @@ void parse_message(const std::string &msg1, Client &client, std::map<int , Clien
 		std::cout << "[" << msj.args[i] << "]";
 	}
 	std::cout << '\n';
+	handle_authentification(client, std::string(password), msj);
 	// if(CMD == "JOIN")
 	// 	handle_join(client, argument);
 	// if(CMD == "NICK")
