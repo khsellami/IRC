@@ -37,10 +37,10 @@ std::string geting_message(const std::string &msg)
     return (pos != std::string::npos) ? msg.substr(pos + 1) : "";
 }
 
-void parse_message(const std::string &msg1, Client &client)
+void parse_message(const std::string &msg1, Client &client, const char* password, std::map<int , Client> clients)
 {
     Msj msj;
-    (void)client;
+    Server server;
     std::string msg = trim(msg1);
     std::cout << "The message is: " << msg << '\n';
 
@@ -57,10 +57,21 @@ void parse_message(const std::string &msg1, Client &client)
         std::cout << "[" << msj.getArgs()[i] << "]\n";
     }
     // std::cout << "Message: " << msj.get_message() << '\n';
-
+    handle_authentification(client, std::string(password), msj, clients);
     if (CMD == "JOIN")
     {
-        std::cout << "Handling JOIN command...\n";
-        handle_join(client, msj);
+        // void handle_join(Server &server, Client &client, Msj &msj)
+        handle_join(server, client, msj);
+        if (server.getChannels().find("#test_channel") != server.getChannels().end()) {
+            std::cout << "Channel exists!\n";
+            std::cout << "Members in channel: " << server.getChannels()["#test_channel"].getMembers().size() << '\n';
+        }
+        else
+        std::cerr << "Channel creation failed!\n";
     }
+    // if (CMD == "PRIVMSG")
+    // {
+    //     std::string message = geting_message(msg);
+    //     std::cout << "Message: " << message << '\n';
+    // }
 }

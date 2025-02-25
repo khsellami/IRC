@@ -10,6 +10,11 @@
 #define PASS_NEEDED_USER_VALIDATED -2
 #define JUST_PASS_NEEDED_TO_AUTH -3
 
+#define OPERATOR 1
+#define INVITED 2
+#define MEMBER 3
+
+
 class Client 
 {
 	private:
@@ -17,6 +22,8 @@ class Client
 		std::string	host;
 		std::string nickname;
 		std::string username;
+		// the mode of the client in the channel, if it's in a channel
+		int Mode_in_channel;
 		//AUTHENTIFICATE
 		bool is_auth;
 		//JOIN

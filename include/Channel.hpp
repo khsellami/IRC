@@ -21,6 +21,7 @@ public:
     Channel() {}
     Channel(std::string name) : name_channel(name) {}
     std::string  getName() { return name_channel; }
+    void setName(std::string name) { name_channel = name; }
     std::vector<Client> getMembers() { return members; }
     void addMember(Client &client) { members.push_back(client); }
     void addOperator(Client &client) { operators.push_back(client); }

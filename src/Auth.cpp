@@ -64,11 +64,12 @@ int Wrong_args(Msj msj){
     }
     return 0;
 }
-void handle_authentification(Client &client, std::string password, Msj msj)
+void handle_authentification(Client &client, std::string password, Msj msj, std::map<int , Client> clients)
 {
 	
     
     std::cout << "Authenticating client: " << client.getSocket() << '\n';
+    (void)clients;
 
     
     if (client.getIs_auth())
@@ -87,6 +88,7 @@ void handle_authentification(Client &client, std::string password, Msj msj)
     {
         if (client.getIs_auth() == false)
         {
+            std::cout << "u can't execute command before authentification!!!\n";
             //throw: "u can't execute command before authentification!!!  "
             return;
         }
@@ -126,10 +128,6 @@ void handle_authentification(Client &client, std::string password, Msj msj)
         client.setIs_auth(true);
     }
 
-
-
-
-    
     // the client can send PASS command more than one time and Just the last one is used for verification
     // if it already connected after verifying password and he try PASS : `You are already connected and cannot handshake again`
     // but the NICK if already setted and he tries again NICK : NICK name will updated.

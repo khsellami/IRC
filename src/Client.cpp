@@ -14,6 +14,7 @@ Client::Client()
 	is_PASS = false;
 	is_NICK = false;
 	is_USER = false;
+	Mode_in_channel = 0;
 }
 
 void Client::setSocket(int fd)

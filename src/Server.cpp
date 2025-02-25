@@ -130,7 +130,7 @@ void Server::connect_client(Server &server)
 				// {
 					//if the client is authentificate
 					// if (client.getIs_auth() == true)
-				parse_message(message, clients[fds[i].fd], clients, channels, password);
+				parse_message(message, clients[fds[i].fd], password, clients);
 				//}
 			}
 		}
