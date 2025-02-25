@@ -2,7 +2,6 @@
 #define CLIENT_HPP
 
 #include <iostream>
-
 #define PASS_VALIDATED 0
 #define NICK_VALIDATED 1
 #define USER_VALIDATED 2
@@ -14,40 +13,39 @@
 #define INVITED 2
 #define MEMBER 3
 
-
 class Client 
 {
 	private:
 		int			fd;
 		std::string	host;
+
+		//////////AUTHENTIFICATE//////////
 		std::string nickname;
 		std::string username;
-		// the mode of the client in the channel, if it's in a channel
-		int Mode_in_channel;
-		//AUTHENTIFICATE
 		bool is_auth;
-		//JOIN
-		// bool is_op;
+		//////////INVITE//////////
+		int Mode_in_channel;
+		bool is_op;
 	public:
+	//////////AUTHENTIFICATE//////////
 		bool is_PASS;
 		bool is_NICK;
 		bool is_USER;
-		Client();
 
-		// setters:
+
+		Client();
+		//setters
 		void setSocket(int fd);
 		void setHost(const std::string &host);
 		void setNickName(std::string Nick);
 		void setUserName(std::string User);
 		void setIs_auth(bool value);
-
-		//getters:
+		//getters
 		int getSocket();
 		std::string getNickName();
 		bool getIs_auth();
-		std::string getName(){
-			return this->nickname;
-		}
+		std::string getName();
+		bool isOp();
 };
 
 #endif

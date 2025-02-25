@@ -2,6 +2,7 @@
 #include "../include/Client.hpp"
 #include "../include/Msj.hpp"
 
+Server::Server(){}
 Server::Server(int port, const char* password)
 {
 	this->port = port;
@@ -70,7 +71,6 @@ void Server::connect_client(Server &server)
 			break;
 		}
 
-		// Check if there is activity on the listening socket
 		if (fds[0].revents & POLLIN)
 		{
 			struct sockaddr_in clientAddress;
@@ -80,7 +80,7 @@ void Server::connect_client(Server &server)
 			if (clientSocket == -1)
 			{
 				perror("accept");
-				continue;  // Retry accepting new connections
+				continue;
 			}
 
 			struct pollfd new_client;
@@ -92,15 +92,13 @@ void Server::connect_client(Server &server)
 			newClient.setSocket(clientSocket);
 			newClient.setHost(inet_ntoa(clientAddress.sin_addr));
 
-			// Insert the client into the map with key = clientSocket
 			clients[clientSocket] = newClient;
 
 			fds.push_back(new_client);
 			std::cout << "New client connected: " << inet_ntoa(clientAddress.sin_addr) << '\n';
 		}
 
-		// Check all connected clients for activity
-		for (size_t i = 1; i < fds.size(); i++)  // Start at 1 to avoid the server socket itself
+		for (size_t i = 1; i < fds.size(); i++)
 		{
 			if (fds[i].revents & POLLIN)
 			{
@@ -112,7 +110,6 @@ void Server::connect_client(Server &server)
 					continue;
 				}
 
-				// Client disconnect
 				if (bytesRead == 0) {
 					std::cout << "Client " << fds[i].fd << " disconnected." << '\n';
 					close(fds[i].fd);
@@ -124,20 +121,28 @@ void Server::connect_client(Server &server)
 				buffer[bytesRead] = '\0';
 				std::string message(buffer);
 				std::cout << "Client " << fds[i].fd << " sent: " << message << '\n';
-				//handle authentification and add the client to the server container
-				// Use map lookup instead of looping over a vector
-				// if (clients.find(fds[i].fd) != clients.end())
-				// {
-					//if the client is authentificate
-					// if (client.getIs_auth() == true)
-				parse_message(message, clients[fds[i].fd], password, clients, server);
-				//}
+				parse_message(message, clients[fds[i].fd], password, clients, server, channels);
 			}
 		}
 	}
-	// Cleanup: Close all file descriptors before program termination
 	for (size_t i = 0; i < fds.size(); i++) {
 		close(fds[i].fd);
 	}
 }
 
+std::map<std::string, Channel> Server::getChannels() const{
+	return channels;
+}
+
+void Server::addChannel(std::string name, Channel channel){
+			channels[name] = channel;
+}
+
+		Client* Server::getClientByName(const std::string &name) {
+			for (size_t i = 0; i < clients.size(); i++) {
+				if (clients[i].getName() == name) {
+					return &clients[i];
+				}
+			}
+			return NULL;
+		}
