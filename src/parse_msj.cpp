@@ -37,10 +37,9 @@ std::string geting_message(const std::string &msg)
     return (pos != std::string::npos) ? msg.substr(pos + 1) : "";
 }
 
-void parse_message(const std::string &msg1, Client &client, const char* password, std::map<int , Client> clients)
+void parse_message(const std::string &msg1, Client &client, const char* password, std::map<int , Client> clients, Server &server)
 {
     Msj msj;
-    Server server;
     std::string msg = trim(msg1);
     std::cout << "The message is: " << msg << '\n';
 
@@ -60,14 +59,28 @@ void parse_message(const std::string &msg1, Client &client, const char* password
     handle_authentification(client, std::string(password), msj, clients);
     if (CMD == "JOIN")
     {
-        // void handle_join(Server &server, Client &client, Msj &msj)
         handle_join(server, client, msj);
-        if (server.getChannels().find("#test_channel") != server.getChannels().end()) {
-            std::cout << "Channel exists!\n";
-            std::cout << "Members in channel: " << server.getChannels()["#test_channel"].getMembers().size() << '\n';
+
+        std::string channel_name = msj.getArgs()[0];
+
+        // Validate channel name before checking existence
+        if (channel_name.empty() || channel_name[0] != '#') {
+            std::cerr << "Error: Invalid channel name! Must start with '#'.\n";
+            return;
         }
-        else
-        std::cerr << "Channel creation failed!\n";
+
+        // Check if the channel was successfully created or already exists
+        if (server.getChannels().find(channel_name) != server.getChannels().end()) {
+            std::cout << "Channel exists!\n";
+            std::cout << "Members in channel: " << server.getChannels()[channel_name].getMembers().size() << '\n';
+        } else {
+            std::cerr << "Channel creation failed!\n";
+        }
+    }
+
+    if (CMD == "INVITE")
+    {
+        handle_invite(server, client, msj);
     }
     // if (CMD == "PRIVMSG")
     // {

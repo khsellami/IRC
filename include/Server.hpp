@@ -32,6 +32,17 @@ class Server
 		std::map<std::string, Channel> getChannels() const{
 			return channels;
 		}
+		void addChannel(std::string name, Channel channel){
+			channels[name] = channel;
+		}
+		Client* getClientByName(const std::string &name) {
+			for (size_t i = 0; i < clients.size(); i++) {
+				if (clients[i].getName() == name) {
+					return &clients[i];
+				}
+			}
+			return NULL;
+		}
 		void	run();
 		Server(int port, const char* password);
 		int getSock() const;
@@ -40,7 +51,8 @@ class Server
 void handle_authentification(Client &client, std::string password, Msj msj, std::map<int , Client> clients);
 // void parse_message(const std::string &msg1, Client &client, std::map<int , Client> clients, std::map<std::string, Channel> channels, const char* password);
 
-void parse_message(const std::string &msg1, Client &client, const char* password, std::map<int , Client> clients);
+void parse_message(const std::string &msg1, Client &client, const char* password, std::map<int , Client> clients, Server &server);
 void handle_join(Server &server, Client &client, Msj &msj);
+void handle_invite(Server &server, Client &client, Msj &msj);
 #endif
 

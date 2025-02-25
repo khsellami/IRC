@@ -88,7 +88,7 @@ void handle_authentification(Client &client, std::string password, Msj msj, std:
     {
         if (client.getIs_auth() == false)
         {
-            std::cout << "u can't execute command before authentification!!!\n";
+            // std::cout << "u can't execute command before authentification!!!\n";
             //throw: "u can't execute command before authentification!!!  "
             return;
         }

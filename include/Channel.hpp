@@ -5,7 +5,8 @@
 #include <string>
 #include <map>
 #include "Client.hpp"
-
+#include <algorithm>
+class Client;
 class Channel {
 private:
     std::string name_channel;
@@ -16,6 +17,8 @@ private:
     // bool inviteOnly;
     // size_t limit;
     std::string password;
+    // bool t;
+    // bool k;
     
 public:
     Channel() {}
@@ -26,7 +29,16 @@ public:
     void addMember(Client &client) { members.push_back(client); }
     void addOperator(Client &client) { operators.push_back(client); }
     void invite(Client &client) { invited.push_back(client); }
-    
+
+    bool isMember(Client &client) {
+        for (std::vector<Client>::iterator it = members.begin(); it != members.end(); ++it) {
+            if (it->getName() == client.getName()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // bool isMember(Client &client) {
     //     return std::find(members.begin(), members.end(), client) != members.end();
     // }

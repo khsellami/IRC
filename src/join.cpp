@@ -27,18 +27,35 @@ void handle_join(Server &server, Client &client, Msj &msj)
         return;
     }
 
-    std::string channel_name = msj.getArgs()[0];
+    std::string raw_channel_name = msj.getArgs()[0];
+
+    // Validate that the channel name starts with '#'
+    if (raw_channel_name.empty() || raw_channel_name[0] != '#') {
+        std::cerr << "Error: Invalid channel name! Must start with '#'.\n";
+        return;
+    }
+
+    // Extract only the part after '#'
+    std::string channel_name = raw_channel_name.substr(1); 
+
+    if (channel_name.empty()) {
+        std::cerr << "Error: Channel name cannot be empty after '#'.\n";
+        return;
+    }
+
     std::cout << "Channel name: " << channel_name << '\n';
 
+    // Check if the channel exists, if not, create it
     if (server.getChannels().find(channel_name) == server.getChannels().end()) {
-        // Create a new channel and add it to the server
         Channel newChannel;
-        newChannel.setName(channel_name); // Use a setter
-        server.getChannels()[channel_name] = newChannel;
+        newChannel.setName(channel_name);
+        server.addChannel(channel_name, newChannel);
         std::cout << "Channel created: " << channel_name << '\n';
     }
 
     // Add client to the channel
-    server.getChannels()[channel_name].addMember(client); // Use a proper addMember function
+    server.getChannels()[channel_name].addMember(client);
     std::cout << "Client joined channel: " << channel_name << '\n';
 }
+
+
