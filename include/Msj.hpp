@@ -9,7 +9,7 @@ class Msj
 {
 	public:
 		std::vector<std::string> args;
-		Msj();
+		Msj(){};
 };
 
 #endif

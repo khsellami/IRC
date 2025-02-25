@@ -33,7 +33,6 @@ std::string trim(const std::string &str)
 	return str.substr(first, last - first + 1);
 }
 
-
 void parse_message(const std::string &msg1, Client &client, const char* password, std::map<int , Client> clients, Server &server, std::map<std::string, Channel> channels)
 {
 	(void)password;
@@ -55,8 +54,9 @@ void parse_message(const std::string &msg1, Client &client, const char* password
 	else if (CMD == "JOIN")
 	{
         handle_join(server, client, msj);
-	}
-	else if  (CMD == "INVITE")
+    }
+
+    if (CMD == "INVITE")
     {
         handle_invite(server, client, msj);
     }
