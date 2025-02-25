@@ -55,21 +55,16 @@ void parse_message(const std::string &msg1, Client &client, const char* password
     {
         std::cout << "[" << msj.getArgs()[i] << "]\n";
     }
-    // std::cout << "Message: " << msj.get_message() << '\n';
     handle_authentification(client, std::string(password), msj, clients);
     if (CMD == "JOIN")
     {
         handle_join(server, client, msj);
 
         std::string channel_name = msj.getArgs()[0];
-
-        // Validate channel name before checking existence
-        if (channel_name.empty() || channel_name[0] != '#') {
-            std::cerr << "Error: Invalid channel name! Must start with '#'.\n";
-            return;
-        }
-
-        // Check if the channel was successfully created or already exists
+        // if (channel_name.empty() || channel_name[0] != '#') {
+        //     std::cerr << "Error: Invalid channel name! Must start with '#'.\n";
+        //     return;
+        // }
         if (server.getChannels().find(channel_name) != server.getChannels().end()) {
             std::cout << "Channel exists!\n";
             std::cout << "Members in channel: " << server.getChannels()[channel_name].getMembers().size() << '\n';

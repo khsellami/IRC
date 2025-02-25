@@ -36,7 +36,7 @@ void handle_join(Server &server, Client &client, Msj &msj)
     }
 
     // Extract only the part after '#'
-    std::string channel_name = raw_channel_name.substr(1); 
+    std::string channel_name = raw_channel_name.substr(0); 
 
     if (channel_name.empty()) {
         std::cerr << "Error: Channel name cannot be empty after '#'.\n";

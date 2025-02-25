@@ -46,7 +46,7 @@ void SetArgs(const std::string& args) {
 
     while (pos < args.length()) {
         if (args[pos] == ':') {  // Détection du message
-            this->message = args.substr(pos + 1);
+            this->message = args.substr(pos);
 
             // Supprimer les `\n` et `\r`
             this->message.erase(std::remove(this->message.begin(), this->message.end(), '\n'), this->message.end());

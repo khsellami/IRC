@@ -49,7 +49,6 @@ class Server
 		void connect_client(Server &server);	
 };
 void handle_authentification(Client &client, std::string password, Msj msj, std::map<int , Client> clients);
-// void parse_message(const std::string &msg1, Client &client, std::map<int , Client> clients, std::map<std::string, Channel> channels, const char* password);
 
 void parse_message(const std::string &msg1, Client &client, const char* password, std::map<int , Client> clients, Server &server);
 void handle_join(Server &server, Client &client, Msj &msj);
