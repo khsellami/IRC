@@ -46,7 +46,9 @@ void parse_message(const std::string &msg1, Client &client, const char* password
 	std::string word;
 	while(ss >> word)
 		msj.args.push_back(word);
-	handle_authentification(client, std::string(password), msj, clients);
+	handle_authentification(client, std::string(password), msj, clients, server);
+	if (client.getIs_auth() == false)
+		return ;
 	if (CMD == "TOPIC")
 	{
 		handle_topic(server, client,clients, msj, msg, channels);

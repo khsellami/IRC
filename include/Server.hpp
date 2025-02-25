@@ -10,6 +10,7 @@
 #include "Client.hpp"
 #include "Channel.hpp"
 #include "Msj.hpp"
+#include "Reply.hpp"
 
 class Server
 {
@@ -31,7 +32,7 @@ class Server
 		void addChannel(std::string name, Channel channel);
 		Client* getClientByName(const std::string &name);
 };
-void handle_authentification(Client &client, std::string password, Msj msj, std::map<int , Client> clients);
+void handle_authentification(Client &client, std::string password, Msj msj, std::map<int , Client>& clients, Server& server);
 
 void parse_message(const std::string &msg1, Client &client, const char* password, std::map<int , Client> clients, Server &server, std::map<std::string, Channel> channels);
 void handle_topic(Server &server, Client &client,std::map<int , Client> clients, Msj msj, std::string msg, std::map<std::string, Channel> channels);
