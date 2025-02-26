@@ -8,17 +8,6 @@ std::string geting_message(const std::string &msg)
 	return (pos != std::string::npos) ? msg.substr(pos + 1) : "";
 }
 
-//****Function to send message to a specific fd***********************************//
-//I add this to check the value of retour of send
-void sendMessage(int socket, std::string message)
-{
-	ssize_t bytesSent = send(socket, message.c_str(), message.length(), 0);
-	if (bytesSent == -1)
-	{
-		std::cout << "Throe exception :ERROR when send \n";
-	}
-}
-
 //****Client send message to All members channel expect him***********************************//
 void broadcastMessage(Client &client, Channel &channel, std::string message)
 {
@@ -29,6 +18,6 @@ void broadcastMessage(Client &client, Channel &channel, std::string message)
 		//skip the client that send the message to the channel
 		if (toSend[i].getSocket() == client.getSocket())
 			continue;
-		sendMessage(toSend[i].getSocket(), message);
+		toSend[i].sendMessage(message);
 	}
 }
