@@ -47,7 +47,7 @@ void parse_message(const std::string &msg1, Client &client, const char* password
 	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "INVITE")
 	{
 		handle_invite(server, client, msj);
-	}
+    }
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	/*
