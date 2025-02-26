@@ -31,6 +31,7 @@ class Client
 		bool is_PASS;
 		bool is_NICK;
 		bool is_USER;
+		std::string messageToSend;
 		bool operator==(const Client &other) const {
         return this->nickname == other.nickname; // Comparaison par pseudo
     	}

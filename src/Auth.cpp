@@ -6,7 +6,7 @@
 /*   By: hmraizik <hmraizik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 11:50:06 by hmraizik          #+#    #+#             */
-/*   Updated: 2025/02/25 23:38:05 by hmraizik         ###   ########.fr       */
+/*   Updated: 2025/02/26 18:48:54 by hmraizik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,12 @@
 void  check_Password(Client& client, std::string password, Msj command){
     if (command.args[0] == "PASS" && command.args[1] == password){
         client.is_PASS = true;
-        std::cout << "PASSWORD verified!!\n";
     }
     else if (command.args[1] != password)
     {
         client.is_PASS = false;
-        std::cout << "PASSWORD Incorrect!!\n";
+        client.messageToSend = "464 :Password incorrect\n";
+        client.sendMessage(client.messageToSend);
     }
 }
 
@@ -31,7 +31,7 @@ bool check_Dupplicated(Msj command, std::map<int, Client> clients){
 
     while (i != clients.end())
     {
-        if (i->second.getNickName() == command.args[1])
+        if (i->second.getNickName() == command.args[1] && i->second.getIs_auth())
         {
             return true;
         }
@@ -66,10 +66,21 @@ bool NickNameValide(Msj command)
 void check_Names(Client& client, Msj command, std::map<int , Client>& clients){
     if (command.args[0] == "NICK")
     {
+          if (command.args.size() < 2 || command.args[1].empty())
+        {
+            client.messageToSend = " 431 :No nickname given\n";
+            client.sendMessage(client.messageToSend);
+        }
         if (!NickNameValide(command))
-            std::cout << "throw: ERR_ERRONEUSNICKNAME\n";
+        {
+            client.messageToSend = "432 " + client.getNickName() + " :Erroneus nickname\n";
+            client.sendMessage(client.messageToSend);
+        }
         if (check_Dupplicated(command, clients))
-            std::cout << "//throw: ERR_NICKNAMEINUSE\n";
+        {
+            client.messageToSend = "433 " + client.getNickName() + " :Nickname is already in use\n";
+            client.sendMessage(client.messageToSend);
+        }
         else
         {
             client.setNickName(command.args[1]);
@@ -78,14 +89,16 @@ void check_Names(Client& client, Msj command, std::map<int , Client>& clients){
     }
     if (command.args[0] == "USER")
     {
-        if (client.is_USER)
+        if (command.args.size() < 5)
         {
-            std::cout << "// throw: ERR_ALREADYREGISTERED\n";
+            client.messageToSend = "461 USER :Not enough parameters\n";
+            client.sendMessage(client.messageToSend);
             return ;
         }
-        if (command.args[1].empty())
+        if (client.is_USER)
         {
-            std::cout << "throw: ERR_NEEDMOREPARAMS\n";
+            client.messageToSend = "462 :You may not reregister\n";
+            client.sendMessage(client.messageToSend);
             return ;
         }
         client.setUserName(command.args[1]);
@@ -93,28 +106,34 @@ void check_Names(Client& client, Msj command, std::map<int , Client>& clients){
     }
 }
 
-int Wrong_args(Msj msj){
-    if (msj.args.size() < 2)
-    {
-        return TOO_FEW_ARGS;
-    }
-    if (msj.args.size() > 2)
-    {
-        return TOO_MUCH_ARGS;
-    }
-    return 0;
-}
-
 void UpdateNickname(Client &client, Server &server, Msj msj, std::map<int , Client>& clients){
     (void)server;
     if (!NickNameValide(msj))
-            std::cout << "//throw: ERR_ERRONEUSNICKNAME\n";
+    {
+        client.messageToSend = "432 " + client.getNickName() + " :Erroneus nickname\n";
+        client.sendMessage(client.messageToSend);
+    }
     if (check_Dupplicated(msj, clients))
-        std::cout << "//throw: ERR_NICKNAMEINUSE\n";
+    {
+        client.messageToSend = "433 " + client.getNickName() + " :Nickname is already in use\n";
+        client.sendMessage(client.messageToSend);
+    }
     std::string OldNickname = client.getNickName();
     client.setNickName(msj.args[0]);
-    std::cout << " // Broadcast to channels: :<oldnickname> NICK :<newnickname>\n";
-    //     // This requires access to the channels the client is in
+    client.sendMessage(std::string(" // Broadcast to channels: :<oldnickname> NICK :<newnickname>\n"));
+}
+
+void KillNicknameCollisions(Client& client, std::map<int , Client>& clients)
+{
+    std::map<int, Client>::iterator i;
+    for (i = clients.begin(); i != clients.end(); ++i){
+        if (i->second.getNickName() == client.getNickName() &&  i->second.getSocket() != client.getSocket())
+        {
+            std::string message = "436 " + client.getNickName() + ":Nickname collision KILL\n";
+            i->second.sendMessage(message);
+            //kill the client
+        }
+    }
 }
 
 void handle_authentification(Client &client, std::string password, Msj msj, std::map<int , Client>& clients, Server& server)
@@ -124,7 +143,8 @@ void handle_authentification(Client &client, std::string password, Msj msj, std:
     {
         if (msj.args[0] == "PASS" || msj.args[0] == "USER")
         {
-            std::cout << "throw:`You are already connected and cannot handshake again`\n";
+            client.messageToSend = "462 :You may not reregister\n";
+            client.sendMessage(client.messageToSend);
             return ;
         }
         else if (msj.args[0] != "NICK")
@@ -134,30 +154,19 @@ void handle_authentification(Client &client, std::string password, Msj msj, std:
     {
         UpdateNickname(client, server, msj, clients);
     }
-    
-    /****** trying a command before registering *************************/
+    /****** trying other command before registering *************************/
     if (client.getIs_auth() == false && msj.args[0] != "PASS" && msj.args[0] != "NICK" && msj.args[0] != "USER")
     {
-            std::cout << "You can't execute command before registering!!!\n";
+            client.messageToSend = "451 :You have not registered\n";
+            client.sendMessage(client.messageToSend);
             return ;
     }
+    //
+    
     if (!client.is_PASS && msj.args[0] != "PASS")
     {
-        std::cout << "You must enter `PASS <password>` first\n";
-        return ;
-    }
-    /******  checking arguments validation first ********************************/
-    if (Wrong_args(msj))
-    {
-        if (Wrong_args(msj) == TOO_MUCH_ARGS)
-        {
-            std::cout << "// throw: not valid arguments: Too much\n";
-        }
-        else if (Wrong_args(msj) == TOO_FEW_ARGS)
-        {
-            std::cout << "// throw: not valid arguments: Too FEW\n";
-            return ;
-        }
+        client.messageToSend = "You must enter `PASS <password>` first\n";
+        client.sendMessage(client.messageToSend);
         return ;
     }
     if (!(client.getIs_auth()) && msj.args[0] == "PASS")
@@ -165,7 +174,6 @@ void handle_authentification(Client &client, std::string password, Msj msj, std:
         check_Password(client, password, msj);
         return ;
     }
-
     if (!(client.getIs_auth()) && client.is_PASS)
     {
         check_Names(client, msj, clients);
@@ -174,6 +182,11 @@ void handle_authentification(Client &client, std::string password, Msj msj, std:
     if (!(client.getIs_auth()) && client.is_PASS && client.is_NICK && client.is_USER)
     {
         client.setIs_auth(true);
-        std::cout << "Welcome, You have registred succesfully!\n";
+        // i kill all clients whos have not yet registred and they use 
+        // the same Nick name while registering
+        KillNicknameCollisions(client, clients);
+
+        client.messageToSend = "Welcome, You have registred succesfully!\n";
+        client.sendMessage(client.messageToSend);
     }
 }
