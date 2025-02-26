@@ -1,5 +1,6 @@
 
 #include "../include/header.hpp"
+//handle duplicate in target
 /*
 	QUESTIONS:
 		1.Is Receivers are separated by a comma (,), or by a comma and space?
@@ -47,16 +48,70 @@ std::vector<std::string> extract_recv(Msj msj)
 }
 /////////////////////SEND////////////////////////////////////////////////////////////////////////////////////
 //****send Channel***********************************//
+void send_channel(std::string recv, Server &server, Client &client)
+{
+	std::string channel_name;
+	channel_name = recv.substr(1);
+	// Search for channel in channels map
+	std::map<std::string, Channel>::iterator ch_it = server.getChannels().find(channel_name);
+	//****Incorrect channel name***********************************//
+	if (ch_it == server.getChannels().end()) 
+	{
+		std::cout << "No such channel name ERR_NOSUCHNICK\n";
+		return;
+	}
+
+	//****channel existe***********************************//
+	Channel ch = ch_it->second;
+	if (!ch.isMember(client))
+	{
+		std::cout << "This client not a member of channel ERR_CANNOTSENDTOCHAN\n";
+		return ;
+	}
+	//broadcast message
+	// ch.broadcast();
+
+}
 
 //****Send User***********************************//
+void send_user(std::string recv, Server &server, std::string message)
+{
+	Client *c = server.getClientByName(recv);
+	//if the client exist in clients inside srever send it a message[recv]
+	//else reply
+	if (c)//client exist
+	{
+		c->sendMessage(message);
+	}
+	else
+	{
+		std::cout << "The user does not exist ERR_NOSUCHNICK\n";
+	}
+
+
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//****Extract Message***********************************//
+std::string extract_msg(Msj msj)
+{
+	std::string message;
+	if (msj.args[2][0] == ':')
+	{
+		message = geting_message(msj.orig_msg);
+
+	}
+	else if (msj.args.size() == 3)
+	{
+		message = msj.args[2];
+	}
+	return message;
+
+}
 //privmsg target Message
 //target privmsg Message
 void handle_privmsg(Server &server, Client &client, Msj msj)
 {
-	(void)server;
-	(void)client;
 	//****just for debug***********************************//
 	std::vector<std::string>::iterator it = msj.args.begin();
 	while (it != msj.args.end())
@@ -84,7 +139,12 @@ void handle_privmsg(Server &server, Client &client, Msj msj)
 	receivers = extract_recv(msj);
 	//Add case : number receivers depasse maximum target allowed ==>> ERR_TOOMANYTARGETS
 	//****Extract Message***********************************//
-	// std::string message= extract_msg(msj);//handle this case in message:Message must start with : if it contains spaces
+	std::string message= extract_msg(msj);//handle this case in message:Message must start with : if it contains spaces
+	if (message.empty())
+	{
+		std::cout << "No Message Provided ERR_NOTEXTTOSEND\n";
+		return ;
+	}
 	//****just for debug : receivers***********************************//
 	std::cout << "=======>>>>>>>Receivers\n";
 	for(size_t i=0; i < receivers.size(); i++)
@@ -92,7 +152,7 @@ void handle_privmsg(Server &server, Client &client, Msj msj)
 		std::cout << "[" << receivers[i] << "] ";
 		if (receivers[i][0] == '#' || receivers[i][0] == '&')
 		{
-			// send_channel();//params:receivers[i],server,message
+			send_channel(receivers[i], server, client);//params:receivers[i],server,message
 			/*
 			send_channel() pseudo-code:
 				1.extract name channel
@@ -104,7 +164,7 @@ void handle_privmsg(Server &server, Client &client, Msj msj)
 		}
 		else
 		{
-			// send_user();
+			send_user(receivers[i], server, message);
 			/*
 			send_user() pseudo-code:
 				1.check if the nick name of user exist in the server ==>> ERR_NOSUCHNICK
