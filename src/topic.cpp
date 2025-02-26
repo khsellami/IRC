@@ -1,5 +1,6 @@
 
 #include "../include/header.hpp"
+#include "../include/Reply.hpp"
 
 void handle_topic(Server &server, Client &client, Msj msj)
 {
@@ -23,7 +24,7 @@ void handle_topic(Server &server, Client &client, Msj msj)
 	std::map<std::string, Channel> channels = server.getChannels();
 	if (msj.args.size() < 2)
 	{
-		std::cout << "The topic command needs arguments ERR_NEEDMOREPARAMS\n";
+		client.sendMessage(ERR_NEEDMOREPARAMS(msj.orig_msg));
 		return;
 	}
 
@@ -36,7 +37,7 @@ void handle_topic(Server &server, Client &client, Msj msj)
 	//****Incorrect channel name***********************************//
 	if (ch_it == channels.end()) 
 	{
-		std::cout << "No such channel name ERR_NOSUCHCHANNEL\n";
+		client.sendMessage(ERR_NOSUCHCHANNEL(channel_name));
 		return;
 	}
 
@@ -45,11 +46,11 @@ void handle_topic(Server &server, Client &client, Msj msj)
 
 	//****if the client not a member in the channel***********************************//
 	/*
-	ch<<== client
+	ch <<== client
 	*/
 	if (!ch.isMember(client))
 	{
-		std::cout << "This client not a member of channel ERR_NOTONCHANNEL\n";
+		client.sendMessage(ERR_NOTONCHANNEL(client.getName(), channel_name));
 		return ;
 	}
 
@@ -63,7 +64,6 @@ void handle_topic(Server &server, Client &client, Msj msj)
 		//no topic provided
 		if(ch.getTopic().empty())
 		{
-			std::cout << "No topic to view in the channel RPL_NOTOPIC\n";
 			return;
 		}
 		//topic exist
@@ -77,6 +77,7 @@ void handle_topic(Server &server, Client &client, Msj msj)
 	//****update topic***********************************//
 	else
 	{
+		std::cout << "try to update the Topic\n\n";
 		//message not start with :
 		if (msj.args[2][0] != ':')
 		{
@@ -94,8 +95,9 @@ void handle_topic(Server &server, Client &client, Msj msj)
 		newTopic = geting_message(msj.orig_msg);
 		std::cout << "new topic=" << newTopic << '\n';
 		ch.setTopic(newTopic);
+		std::cout << "get topic" <<ch.getTopic() << '\n';
 		//broadcastmessage to all members in channel expect client itself
-		std::string rpl = "New topic changed RPL_TOPIC\n";
+		std::string rpl = RPL_TOPIC(client.getName(), channel_name, newTopic);
 		// std::cout << rpl << '\n';
 		//****Broadcast the change of the topic to All members in the channel***********************************//
 		broadcastMessage(client, ch, rpl);
