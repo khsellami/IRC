@@ -6,7 +6,7 @@
 /*   By: hmraizik <hmraizik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 11:50:06 by hmraizik          #+#    #+#             */
-/*   Updated: 2025/02/26 18:48:54 by hmraizik         ###   ########.fr       */
+/*   Updated: 2025/02/26 19:00:18 by hmraizik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,7 @@ void KillNicknameCollisions(Client& client, std::map<int , Client>& clients)
         {
             std::string message = "436 " + client.getNickName() + ":Nickname collision KILL\n";
             i->second.sendMessage(message);
-            //kill the client
+            close(i->second.getSocket());
         }
     }
 }
