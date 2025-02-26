@@ -31,6 +31,9 @@ class Client
 		bool is_PASS;
 		bool is_NICK;
 		bool is_USER;
+		bool operator==(const Client &other) const {
+        return this->nickname == other.nickname; // Comparaison par pseudo
+    	}
 
 
 		Client();
@@ -46,6 +49,12 @@ class Client
 		bool getIs_auth();
 		std::string getName();
 		bool isOp();
+		void sendMessage(const std::string &message);
+		bool getIs_operator(){
+			if (is_op == true)
+				return true;
+			return false;
+		}
 };
 
 #endif

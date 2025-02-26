@@ -5,76 +5,42 @@
 #include <iostream>
 #include <vector>
 
+
+
 void handle_join(Server &server, Client &client, Msj &msj)
 {
-	if (msj.args[1].empty()) {
-		std::cerr << "Error: No channel name provided!\n";
-		return;
-	}
-
-	std::string raw_channel_name = msj.args[1];
-
-	// Validate that the channel name starts with '#'
-	if (raw_channel_name.empty() || raw_channel_name[0] != '#') {
-		std::cerr << "Error: Invalid channel name! Must start with '#'.\n";
-		return;
-	}
-
-	// Extract only the part after '#'
-	std::string channel_name = raw_channel_name.substr(0); 
-
-	if (channel_name.empty()) {
-		std::cerr << "Error: Channel name cannot be empty after '#'.\n";
-		return;
-	}
-
-	std::cout << "Channel name: " << channel_name << '\n';
-
-	// Check if the channel exists, if not, create it
-	if (server.getChannels().find(channel_name) == server.getChannels().end()) {
-		Channel newChannel;
-		newChannel.setName(channel_name);
-		server.addChannel(channel_name, newChannel);
-		std::cout << "Channel created: " << channel_name << '\n';
-	}
-
-	// Add client to the channel
-	server.getChannels()[channel_name].addMember(client);
-	std::cout << "Client joined channel: " << channel_name << '\n';
-    // if (msj.getArgs().empty()) {
-    //     std::cerr << "Error: No channel name provided!\n";
-    //     return;
-    // }
-
-    // std::string raw_channel_name = msj.getArgs()[0];
-
-    // Validate that the channel name starts with '#'
-    if (raw_channel_name.empty() || raw_channel_name[0] != '#') {
-        std::cerr << "Error: Invalid channel name! Must start with '#'.\n";
+    for (size_t i = 0; i < msj.args.size(); i++)
+    {
+        std::cout << "------------------>" << msj.args[i] << std::endl;
+    }
+    if (msj.args.size() < 2)
+    {
+        client.sendMessage("431 You have to provide a channel name.");
         return;
     }
 
-    // Extract only the part after '#'
-	channel_name = raw_channel_name.substr(0); 
+    std::string channel_name = msj.args[1];
 
-    if (channel_name.empty()) {
-        std::cerr << "Error: Channel name cannot be empty after '#'.\n";
-        return;
+    // Get reference to server channels
+    std::map<std::string, Channel> &channels = server.getChannels();
+
+    // Check if the channel exists
+    if (channels.find(channel_name) == channels.end())
+    {
+        // If not, create a new channel and add it to the server
+        std::cout << "Creating new channel: " << channel_name << std::endl;
+        Channel new_channel(channel_name);
+        server.addChannel(channel_name, new_channel);
     }
-
-    std::cout << "Channel name: " << channel_name << '\n';
-
-    // Check if the channel exists, if not, create it
-    if (server.getChannels().find(channel_name) == server.getChannels().end()) {
-        Channel newChannel;
-        newChannel.setName(channel_name);
-        server.addChannel(channel_name, newChannel);
-        std::cout << "Channel created: " << channel_name << '\n';
+    Channel &channel = channels[channel_name];
+    if (!channel.isMember(client))
+    {
+        channel.addMember(client);
+        std::cout << "Client joined channel: " << channel.getName() << std::endl;
     }
-
-    // Add client to the channel
-    server.getChannels()[channel_name].addMember(client);
-    std::cout << "Client joined channel: " << channel_name << '\n';
+    else
+    {
+        client.sendMessage("You are already a member of this channel.");
+    }
 }
-
 

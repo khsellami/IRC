@@ -48,6 +48,7 @@ void parse_message(const std::string &msg1, Client &client, const char* password
 	{
 		handle_invite(server, client, msj);
 	}
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	/*
 	To handle 2 cases:

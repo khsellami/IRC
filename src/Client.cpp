@@ -58,3 +58,11 @@ std::string Client::getName(){
 }
 
 bool Client::isOp(){return is_op;}
+void Client::sendMessage(const std::string &message)
+{
+    std::string formattedMessage = message + "\r\n"; // Format IRC
+    if (write(fd, formattedMessage.c_str(), formattedMessage.length()) == -1)
+    {
+        std::cerr << "Error sending message to client " << fd << std::endl;
+    }
+}

@@ -28,9 +28,10 @@ class Server
 		Server(int port, const char* password);
 		int getSock() const;
 		void connect_client(Server &server);
-		std::map<std::string, Channel> getChannels() const;
+		std::map<std::string, Channel> &getChannels();
 		void addChannel(std::string name, Channel channel);
 		Client* getClientByName(const std::string &name);
+	
 };
 
 #endif

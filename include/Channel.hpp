@@ -32,7 +32,13 @@ class Channel
 		//setters
 		void setTopic(std::string topic);
 		void setName(std::string name);
-
+		bool isInvited(Client &client){return std::find(invited.begin(), invited.end(), client) != invited.end();}
+		bool isOperator(Client &client){
+			if (client.getIs_operator() == true)
+				return true;
+			return false;
+		}
+		bool isInviteOnly(){return t;}
 		void addMember(Client &client);
 		bool isMember(Client &client);
 		void invite(Client &client);

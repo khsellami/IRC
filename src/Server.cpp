@@ -131,10 +131,11 @@ void Server::connect_client(Server &server)
 	}
 }
 
-std::map<std::string, Channel> Server::getChannels() const
-{
-	return channels;
+std::map<std::string, Channel>& Server::getChannels() {
+    return channels;
 }
+
+
 
 void Server::addChannel(std::string name, Channel channel)
 {
