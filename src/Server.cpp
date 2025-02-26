@@ -2,6 +2,7 @@
 #include "../include/header.hpp"
 
 Server::Server(){}
+
 Server::Server(int port, const char* password)
 {
 	this->port = port;
@@ -124,24 +125,28 @@ void Server::connect_client(Server &server)
 			}
 		}
 	}
-	for (size_t i = 0; i < fds.size(); i++) {
+	for (size_t i = 0; i < fds.size(); i++)
+	{
 		close(fds[i].fd);
 	}
 }
 
-std::map<std::string, Channel> Server::getChannels() const{
+std::map<std::string, Channel> Server::getChannels() const
+{
 	return channels;
 }
 
-void Server::addChannel(std::string name, Channel channel){
-			channels[name] = channel;
+void Server::addChannel(std::string name, Channel channel)
+{
+	channels[name] = channel;
 }
 
-		Client* Server::getClientByName(const std::string &name) {
-			for (size_t i = 0; i < clients.size(); i++) {
-				if (clients[i].getName() == name) {
-					return &clients[i];
-				}
-			}
-			return NULL;
-		}
+Client* Server::getClientByName(const std::string &name)
+{
+	for (size_t i = 0; i < clients.size(); i++)
+	{
+		if (clients[i].getName() == name)
+			return &clients[i];
+	}
+	return NULL;
+}

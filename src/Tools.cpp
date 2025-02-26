@@ -28,7 +28,7 @@ void broadcastMessage(Client &client, Channel &channel, std::string message)
 	{
 		//skip the client that send the message to the channel
 		if (toSend[i].getSocket() == client.getSocket())
-			continue;	
+			continue;
 		sendMessage(toSend[i].getSocket(), message);
 	}
 }

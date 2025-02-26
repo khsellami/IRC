@@ -32,28 +32,35 @@ void parse_message(const std::string &msg1, Client &client, const char* password
 	(void)channels;
 	Msj msj;
 	std::string msg = trim(msg1);
-	std::cout << "The message is: " << msg << '\n';
-	std::string command = getCommand(msg);
-	std::string argument = getArgument(msg);
-	std::string CMD = toUpper(command);
 	std::stringstream  ss(msg);
 	std::string word;
-	while(ss >> word)
+	while (ss >> word)
 		msj.args.push_back(word);
+	msj.orig_msg = msg;
 	handle_authentification(client, std::string(password), msj, clients, server);
 	if (client.getIs_auth() == false)
 		return ;
-	if (CMD == "TOPIC")
+	if (msj.args.size() > 0 && toUpper(msj.args[0]) == "JOIN")
 	{
-		msj.orig_msg = msg;
+		handle_join(server, client, msj);
+	}
+	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "INVITE")
+	{
+		handle_invite(server, client, msj);
+	}
+	//////////////////////////////////////////////////////////////////////////////////////////////////
+	/*
+	To handle 2 cases:
+		privmsg target :message 
+		:message privmsg target
+	*/
+	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "TOPIC")
+	{
 		handle_topic(server, client, msj);
 	}
-	else if (CMD == "JOIN")
+	else if ((msj.args.size() > 0 && toUpper(msj.args[0]) == "PRIVMSG") || (msj.args.size() > 1 && toUpper(msj.args[1]) == "PRIVMSG"))
 	{
-        handle_join(server, client, msj);
-    }
-    else if (CMD == "INVITE")
-    {
-        handle_invite(server, client, msj);
-    }
+		handle_privmsg(server, client, msj);
+	}
+	//////////////////////////////////////////////////////////////////////////////////////////////////
 }
