@@ -1,10 +1,5 @@
-#include "../include/Msj.hpp"
-#include "../include/Client.hpp"
-#include <iostream>
-#include "../include/Server.hpp"
-#include <algorithm>
 
-
+#include "../include/header.hpp"
 
 std::string getCommand(const std::string &msg)
 {
@@ -16,7 +11,6 @@ std::string getArgument(const std::string &msg)
 	size_t pos = msg.find(" ");
 	return (pos != std::string::npos) ? msg.substr(pos + 1) : "";
 }
-
 
 std::string toUpper(const std::string &str)
 {
@@ -35,7 +29,7 @@ std::string trim(const std::string &str)
 
 void parse_message(const std::string &msg1, Client &client, const char* password, std::map<int , Client> clients, Server &server, std::map<std::string, Channel> channels)
 {
-	(void)password;
+	(void)channels;
 	Msj msj;
 	std::string msg = trim(msg1);
 	std::cout << "The message is: " << msg << '\n';
@@ -51,14 +45,14 @@ void parse_message(const std::string &msg1, Client &client, const char* password
 		return ;
 	if (CMD == "TOPIC")
 	{
-		handle_topic(server, client,clients, msj, msg, channels);
+		msj.orig_msg = msg;
+		handle_topic(server, client, msj);
 	}
 	else if (CMD == "JOIN")
 	{
         handle_join(server, client, msj);
     }
-
-    if (CMD == "INVITE")
+    else if (CMD == "INVITE")
     {
         handle_invite(server, client, msj);
     }

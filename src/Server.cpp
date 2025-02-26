@@ -1,6 +1,5 @@
-#include "../include/Server.hpp"
-#include "../include/Client.hpp"
-#include "../include/Msj.hpp"
+
+#include "../include/header.hpp"
 
 Server::Server(){}
 Server::Server(int port, const char* password)

@@ -28,6 +28,7 @@ class Channel
 		bool getT();
 		std::string  getName();
 		std::string getTopic(){return topic;}
+		std::vector<Client> getMembers();
 		//setters
 		void setTopic(std::string topic);
 		void setName(std::string name);

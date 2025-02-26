@@ -9,6 +9,7 @@ class Msj
 {
 	public:
 		std::vector<std::string> args;
+		std::string orig_msg;
 		Msj(){};
 };
 

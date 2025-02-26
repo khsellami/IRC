@@ -14,12 +14,16 @@ void Channel::setTopic(std::string topic){this->topic = topic;}
 
 void Channel::addMember(Client &client) { members.push_back(client); }
 
-    bool Channel::isMember(Client &client) {
-        for (std::vector<Client>::iterator it = members.begin(); it != members.end(); ++it) {
-            if (it->getName() == client.getName()) {
-                return true;
-            }
+bool Channel::isMember(Client &client)
+{
+    for (std::vector<Client>::iterator it = members.begin(); it != members.end(); ++it) {
+        if (it->getName() == client.getName()) {
+            return true;
         }
-        return false;
     }
+    return false;
+}
+
 void Channel::invite(Client &client) { invited.push_back(client); }
+
+std::vector<Client> Channel::getMembers(){return members; }
