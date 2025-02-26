@@ -4,9 +4,9 @@
 void handle_topic(Server &server, Client &client, Msj msj)
 {
 	std::cout << "CHannels\n\n";
-    for(std::map<std::string, Channel>::iterator it = server.getChannels().begin(); it != server.getChannels().end() ;++it)
-    {
-        std::cout << it->first << '\n';
+	for(std::map<std::string, Channel>::iterator it = server.getChannels().begin(); it != server.getChannels().end() ;++it)
+	{
+		std::cout << it->first << '\n';
 	}
 	//****just for debug***********************************//
 	std::vector<std::string>::iterator it = msj.args.begin();
@@ -92,9 +92,11 @@ void handle_topic(Server &server, Client &client, Msj msj)
 		//Has permissions
 		std::string newTopic;
 		newTopic = geting_message(msj.orig_msg);
+		std::cout << "new topic=" << newTopic << '\n';
 		ch.setTopic(newTopic);
 		//broadcastmessage to all members in channel expect client itself
 		std::string rpl = "New topic changed RPL_TOPIC\n";
+		// std::cout << rpl << '\n';
 		//****Broadcast the change of the topic to All members in the channel***********************************//
 		broadcastMessage(client, ch, rpl);
 	}
