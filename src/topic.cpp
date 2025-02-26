@@ -3,7 +3,7 @@
 
 void handle_topic(Server &server, Client &client, Msj msj)
 {
-			    std::cout << "CHannels\n\n";
+	std::cout << "CHannels\n\n";
     for(std::map<std::string, Channel>::iterator it = server.getChannels().begin(); it != server.getChannels().end() ;++it)
     {
         std::cout << it->first << '\n';
@@ -29,6 +29,7 @@ void handle_topic(Server &server, Client &client, Msj msj)
 
 	// Extract channel name
 	std::string channel_name = (msj.args[1][0] == '#' || msj.args[1][0] == '&') ? msj.args[1].substr(1) : msj.args[1];
+	
 
 	// Search for channel in channels map
 	std::map<std::string, Channel>::iterator ch_it = channels.find(channel_name);
