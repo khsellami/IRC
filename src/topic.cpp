@@ -3,6 +3,11 @@
 
 void handle_topic(Server &server, Client &client, Msj msj)
 {
+			    std::cout << "CHannels\n\n";
+    for(std::map<std::string, Channel>::iterator it = server.getChannels().begin(); it != server.getChannels().end() ;++it)
+    {
+        std::cout << it->first << '\n';
+	}
 	//****just for debug***********************************//
 	std::vector<std::string>::iterator it = msj.args.begin();
 	while (it != msj.args.end())
