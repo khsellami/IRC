@@ -1,6 +1,6 @@
 
 #include "../include/header.hpp"
-//handle duplicate in target
+//NEED TO CHECK DUPLICATE TARGETS
 /*
 	QUESTIONS:
 		1.Is Receivers are separated by a comma (,), or by a comma and space?
