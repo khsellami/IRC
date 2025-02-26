@@ -1,9 +1,4 @@
-#ifndef REPLY_HPP
-#define REPLY_HPP
-
-#define OPERATOR 1
-#define INVITED 2
-#define MEMBER 3
+#define once
 
 #define PREFIX ":IRCServer "
 #define POSTFIX "\r\n" 
@@ -45,5 +40,3 @@
 #define RPL_JOIN(sender, channel)						":" + sender + " JOIN :" + channel + POSTFIX
 #define RPL_CHANGEMODE(hostname, channelname, mode)		(":" + hostname + " MODE " + channelname + " " + mode + POSTFIX)
 #define RPL_UMODEIS(hostname, channelname, mode, user)	":" + hostname + " MODE " + channelname + " " + mode + " " + user + POSTFIX
-
-#endif
