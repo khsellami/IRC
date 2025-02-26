@@ -17,7 +17,11 @@ class Channel
 		//////////JOIN//////////
 		std::vector<Client> members;
 		std::vector<Client> invited;
+		std::vector<std::string> bannedUsers;
 		//////////MODE//////////
+		std::vector<Client> operators;
+		std::string key;
+		bool inviteOnly;
 		bool t;
 
 	public:
@@ -33,12 +37,16 @@ class Channel
 		void setTopic(std::string topic);
 		void setName(std::string name);
 		bool isInvited(Client &client){return std::find(invited.begin(), invited.end(), client) != invited.end();}
-		bool isOperator(Client &client){
-			if (client.getIs_operator() == true)
-				return true;
-			return false;
-		}
-		bool isInviteOnly(){return t;}
+		bool isOperator(const Client &client) const { return std::find(operators.begin(), operators.end(), client) != operators.end(); }
+		bool iSInviteOnly();
+        bool hasKey();
+		std::string getKey();
+		std::string getUserList();
+		// bool iSInviteOnly(){return t;}
+		void setKey(std::string newKey);
+        void setInviteOnly(bool status);
+		void broadcast(const std::string &message);
+		bool isBanned(Client &client);
 		void addMember(Client &client);
 		bool isMember(Client &client);
 		void invite(Client &client);

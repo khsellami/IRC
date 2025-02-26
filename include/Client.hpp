@@ -56,6 +56,7 @@ class Client
 				return true;
 			return false;
 		}
+		std::string getPrefix();
 };
 
 #endif

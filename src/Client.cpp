@@ -66,3 +66,7 @@ void Client::sendMessage(const std::string &message)
         std::cerr << "Error sending message to client " << fd << std::endl;
     }
 }
+std::string Client::getPrefix()
+{
+    return ":" + nickname + "!user@host";
+}
