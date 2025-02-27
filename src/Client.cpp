@@ -44,6 +44,30 @@ void Client::setNickName(std::string Nick)
 {
 	nickname = Nick;
 }
+void Client::setHostname(std::string Hostname)
+{
+	hostname = Hostname;
+}
+void Client::setRealname(std::string Realname)
+{
+	realname = Realname;
+}
+void Client::setServername(std::string Servername)
+{
+	servername = Servername;
+}
+std::string Client::getHostname()
+{
+	return hostname;
+}
+std::string Client::getRealname()
+{
+	return realname;
+}
+std::string Client::getServername()
+{
+	return servername;
+}
 std::string Client::getNickName()
 {
 	return nickname;
@@ -54,7 +78,7 @@ void Client::setUserName(std::string User)
 }
 
 std::string Client::getName(){
-	return this->nickname;
+	return this->username;
 }
 
 bool Client::isOp(){return is_op;}

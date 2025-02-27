@@ -22,6 +22,9 @@ class Client
 		//////////AUTHENTIFICATE//////////
 		std::string nickname;
 		std::string username;
+		std::string hostname;
+		std::string servername;
+		std::string realname;
 		bool is_auth;
 		//////////INVITE//////////
 		int Mode_in_channel;
@@ -43,8 +46,14 @@ class Client
 		void setHost(const std::string &host);
 		void setNickName(std::string Nick);
 		void setUserName(std::string User);
+		void setHostname(std::string Hostname);
+		void setServername(std::string Servername);
+		void setRealname(std::string Realname);
 		void setIs_auth(bool value);
 		//getters
+		std::string getHostname();
+		std::string getRealname();
+		std::string getServername();
 		int getSocket();
 		std::string getNickName();
 		bool getIs_auth();

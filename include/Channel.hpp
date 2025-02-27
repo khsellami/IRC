@@ -22,7 +22,8 @@ class Channel
 		std::vector<Client> operators;
 		std::string key;
 		bool inviteOnly;
-		bool t;
+		bool t;//topic
+		// bool i;//invite 
 
 	public:
 	//constructors
