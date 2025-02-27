@@ -56,6 +56,12 @@ class Client
 				return true;
 			return false;
 		}
+		void setOperator(bool status){
+			if (status == true)
+				is_op = true;
+			else
+				is_op = false;
+		}
 		std::string getPrefix();
 };
 

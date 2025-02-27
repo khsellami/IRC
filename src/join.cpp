@@ -54,12 +54,18 @@ void handle_join(Server &server, Client &client, Msj &msj)
     }
 
     std::string channel_name = msj.args[1]; // First parameter is the channel name
+    if (!channel_name.empty() && channel_name[1] == '#') 
+    {
+        channel_name = channel_name.substr(1);
+    }
     std::string key = (msj.args.size() > 1) ? msj.args[1] : ""; // Second parameter is optional key
 
     std::map<std::string, Channel> &channels = server.getChannels();
 
+    bool is_new_channel = (channels.find(channel_name) == channels.end());
+
     // Create the channel if it does not exist
-    if (channels.find(channel_name) == channels.end())
+    if (is_new_channel)
     {
         std::cout << "Creating new channel: " << channel_name << std::endl;
         Channel new_channel(channel_name);
@@ -93,6 +99,16 @@ void handle_join(Server &server, Client &client, Msj &msj)
     if (!channel.isMember(client))
     {
         channel.addMember(client);
+        
+        // If this is a new channel, make the first client the operator
+        if (is_new_channel)
+        {
+            client.setOperator(true);
+            channel.setOperator(client);
+            std::cout << client.getName() << " is now the operator of channel: " << channel.getName() << std::endl;
+            std::cout <<"!!!!!!!!!!!!!!!!!"<< client.getIs_operator() << std::endl;
+        }
+
         std::cout << client.getName() << " joined channel: " << channel.getName() << std::endl;
 
         // Send JOIN confirmation to all members
@@ -113,10 +129,5 @@ void handle_join(Server &server, Client &client, Msj &msj)
     {
         client.sendMessage("462 " + client.getName() + " :You are already in this channel.");
     }
-    // std::cout << "CHannels\n\n";
-    // for(std::map<std::string, Channel>::iterator it = server.getChannels().begin(); it != server.getChannels().end() ;++it)
-    // {
-    //     std::cout << it->first << '\n';
-    // }
-
 }
+
