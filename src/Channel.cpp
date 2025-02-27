@@ -69,3 +69,15 @@ void Channel::invite(Client &client)
 
 
 std::vector<Client> Channel::getMembers(){return members; }
+
+void Channel::setOperator(Client &client)
+{
+    if (!isMember(client))
+    {
+        return;
+    }
+    if (std::find(operators.begin(), operators.end(), client) == operators.end())
+    {
+        operators.push_back(client);
+    }
+}

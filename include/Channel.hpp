@@ -38,7 +38,9 @@ class Channel
 		void setTopic(std::string topic);
 		void setName(std::string name);
 		bool isInvited(Client &client){return std::find(invited.begin(), invited.end(), client) != invited.end();}
-		bool isOperator(const Client &client) const { return std::find(operators.begin(), operators.end(), client) != operators.end(); }
+		// bool isOperator(const Client &client) const { return std::find(operators.begin(), operators.end(), client) != operators.end(); }
+		void setOperator(Client &client);
+		bool isOperator(Client &client){return std::find(operators.begin(), operators.end(), client) != operators.end();}
 		bool iSInviteOnly();
         bool hasKey();
 		std::string getKey();
