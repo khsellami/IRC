@@ -46,4 +46,8 @@
 #define RPL_CHANGEMODE(hostname, channelname, mode)		(":" + hostname + " MODE " + channelname + " " + mode + POSTFIX)
 #define RPL_UMODEIS(hostname, channelname, mode, user)	":" + hostname + " MODE " + channelname + " " + mode + " " + user + POSTFIX
 
+//////////ADDED:
+#define ERR_CANNOTSENDTOCHAN(channel) "404 " + channel + " :Cannot send to channel"
+#define ERR_TOOMANYTARGETS(target) "407 " + target + " :Too many recipients"
+
 #endif
