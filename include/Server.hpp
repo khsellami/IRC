@@ -1,6 +1,7 @@
 #ifndef Server_HPP
 #define Server_HPP
 
+#include <cstdio>
 #include <poll.h>
 #include <arpa/inet.h>
 #include <unistd.h>
