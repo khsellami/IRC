@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Auth.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ksellami <ksellami@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hmraizik <hmraizik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 11:50:06 by hmraizik          #+#    #+#             */
-/*   Updated: 2025/02/27 19:08:28 by ksellami         ###   ########.fr       */
+/*   Updated: 2025/02/27 18:03:09 by hmraizik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,5 +199,4 @@ void handle_authentification(Client &client, std::string password, Msj msj, std:
         client.messageToSend = "Welcome, You have registred succesfully!\n";
         client.sendMessage(client.messageToSend);
     }
-    // std::cout << "Client hostname:"<< client.getHostname() << '\n';
 }
