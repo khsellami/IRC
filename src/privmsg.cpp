@@ -1,5 +1,7 @@
 
 #include "../include/header.hpp"
+#include "../include/Reply.hpp"
+#define MAX_TARGETS 3
 //NEED TO CHECK DUPLICATE TARGETS
 /*
 	QUESTIONS:
@@ -43,12 +45,14 @@ std::vector<std::string> extract_recv(Msj msj)
 	{
 		if (!target.empty()) // To serach i need to do what if there is an empty target in the command
 			receivers.push_back(target);
+		else
+			std::cerr << "ERR_NORECIPIENT: Empty target found\n";
 	}
 	return receivers;
 }
 /////////////////////SEND////////////////////////////////////////////////////////////////////////////////////
 //****send Channel***********************************//
-void send_channel(std::string recv, Server &server, Client &client)
+void send_channel(std::string recv, Server &server, Client &client, std::string message)
 {
 	std::string channel_name;
 	channel_name = recv.substr(1);
@@ -57,7 +61,7 @@ void send_channel(std::string recv, Server &server, Client &client)
 	//****Incorrect channel name***********************************//
 	if (ch_it == server.getChannels().end()) 
 	{
-		std::cout << "No such channel name ERR_NOSUCHNICK\n";
+		client.sendMessage(ERR_NOSUCHCHANNEL(recv));
 		return;
 	}
 
@@ -65,11 +69,11 @@ void send_channel(std::string recv, Server &server, Client &client)
 	Channel ch = ch_it->second;
 	if (!ch.isMember(client))
 	{
-		std::cout << "This client not a member of channel ERR_CANNOTSENDTOCHAN\n";
+		client.sendMessage(ERR_CANNOTSENDTOCHAN(channel_name));
 		return ;
 	}
 	//broadcast message
-	// ch.broadcast();
+	broadcastMessage(client,ch, message);
 
 }
 
@@ -85,7 +89,7 @@ void send_user(std::string recv, Server &server, std::string message)
 	}
 	else
 	{
-		std::cout << "The user does not exist ERR_NOSUCHNICK\n";
+		c->sendMessage(ERR_NOSUCHNICK(recv));
 	}
 
 
@@ -112,47 +116,54 @@ std::string extract_msg(Msj msj)
 //target privmsg Message
 void handle_privmsg(Server &server, Client &client, Msj msj)
 {
+	//DEBUG
 	//****just for debug***********************************//
-	std::vector<std::string>::iterator it = msj.args.begin();
-	while (it != msj.args.end())
-	{
-		std::cout << "[" << *it << "] ";
-		it++;
-	}
-	std::cout << '\n';
-	std::cout << "*********Inside privmsg Command*******************\n";
+	// std::vector<std::string>::iterator it = msj.args.begin();
+	// while (it != msj.args.end())
+	// {
+	// 	std::cout << "[" << *it << "] ";
+	// 	it++;
+	// }
+	// std::cout << '\n';
+	// std::cout << "*********Inside privmsg Command*******************\n";
 	//****Check if the presence of target***********************************//
 	if (msj.args.size() < 2)
 	{
-		std::cout << "No Target Provided ERR_NORECIPIENT\n";
+		client.sendMessage(std::string("No Target Provided ERR_NORECIPIENT\n"));
 		return ;
 	}
 	//****Check if the presence of Message***********************************//
 	if (msj.args.size() < 3)
 	{
-		std::cout << "No Message Provided ERR_NOTEXTTOSEND\n";
+		client.sendMessage(ERR_NOTEXTTOSEND());
 		return ;
 	}
 
 	//****Extract Receivers***********************************//
 	std::vector<std::string> receivers;
 	receivers = extract_recv(msj);
+	if (receivers.size()> MAX_TARGETS)
+	{
+		client.sendMessage(ERR_TOOMANYTARGETS(std::string("user1,user2,.......")));
+    	return;
+
+	}
 	//Add case : number receivers depasse maximum target allowed ==>> ERR_TOOMANYTARGETS
 	//****Extract Message***********************************//
 	std::string message= extract_msg(msj);//handle this case in message:Message must start with : if it contains spaces
 	if (message.empty())
 	{
-		std::cout << "No Message Provided ERR_NOTEXTTOSEND\n";
+		client.sendMessage(ERR_NOTEXTTOSEND());
 		return ;
 	}
 	//****just for debug : receivers***********************************//
-	std::cout << "=======>>>>>>>Receivers\n";
+	// std::cout << "=======>>>>>>>Receivers\n";
 	for(size_t i=0; i < receivers.size(); i++)
 	{
-		std::cout << "[" << receivers[i] << "] ";
+		// std::cout << "[" << receivers[i] << "] ";
 		if (receivers[i][0] == '#' || receivers[i][0] == '&')
 		{
-			send_channel(receivers[i], server, client);//params:receivers[i],server,message
+			send_channel(receivers[i], server, client,message);//params:receivers[i],server,message
 			/*
 			send_channel() pseudo-code:
 				1.extract name channel
@@ -173,7 +184,7 @@ void handle_privmsg(Server &server, Client &client, Msj msj)
 			*/
 		}
 	}
-	std::cout << '\n';
+	// std::cout << '\n';
 }
 
 /*
