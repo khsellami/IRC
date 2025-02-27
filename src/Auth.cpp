@@ -6,14 +6,30 @@
 /*   By: hmraizik <hmraizik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 11:50:06 by hmraizik          #+#    #+#             */
-/*   Updated: 2025/02/27 18:03:09 by hmraizik         ###   ########.fr       */
+/*   Updated: 2025/02/27 23:29:22 by hmraizik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Client.hpp"
 #include "../include/Server.hpp"
+#include "../include/header.hpp"
 #include <sstream>
 
+
+
+void broadcastMessageForNick(Client &client, Channel &channel, std::string message)
+{
+	//Extract the members of the channel
+	std::vector <Client> toSend = channel.getMembers();
+	for (size_t i=0 ; i < toSend.size(); i++)
+	{
+		//skip the client that send the message to the channel
+		if (toSend[i].getSocket() == client.getSocket() || toSend[i].has_received)
+			continue;
+		toSend[i].sendMessage(message);
+        toSend[i].has_received = true;
+	}
+}
 
 
 void  check_Password(Client& client, std::string password, Msj command){
@@ -70,19 +86,23 @@ void check_Names(Client& client, Msj command, std::map<int , Client>& clients){
           if (command.args.size() < 2 || command.args[1].empty())
         {
             client.sendMessage(ERR_NONICKNAMEGIVEN(command.args[1]));
+            return ;
         }
         if (!NickNameValide(command))
         {
             client.sendMessage(ERR_ERRONEUSNICKNAME(command.args[1]));
+            return ;
         }
         if (check_Dupplicated(command, clients))
         {
             client.sendMessage(ERR_NICKNAMEINUSE(command.args[1]));
+            return ;
         }
         else
         {
             client.setNickName(command.args[1]);
             client.is_NICK = true;
+            return ;
         }
     }
     if (command.args[0] == "USER")
@@ -118,21 +138,53 @@ void check_Names(Client& client, Msj command, std::map<int , Client>& clients){
     }
 }
 
+void reset_hasReceivedBool(Server& server, Client& client){
+    std::map<std::string, Channel> channels = server.getChannels();
+    std::map<std::string, Channel>::iterator it = channels.begin();
+
+    while (it != channels.end()){
+        if (it->second.isMember(client))
+        {
+            std::vector <Client> clients = it->second.getMembers();
+            for (size_t i = 0; i < clients.size(); i++)
+            {
+                clients[i].has_received = false;
+            }
+        }
+        ++it;
+    }
+}
+void prodcastNickUpdated(Server &server, Client& client, std::string oldNick){
+    std::map<std::string, Channel> channels = server.getChannels();
+    std::map<std::string, Channel>::iterator it = channels.begin();
+    std::string message = oldNick + " changed his nickname to " + client.getNickName();
+    while (it != channels.end())
+    {
+        if (it->second.isMember(client))
+        {
+            broadcastMessageForNick(client, it->second, message);
+        }
+        ++it;
+    }
+    // reset `has_received boolean
+    reset_hasReceivedBool(server, client);
+}
+
 void UpdateNickname(Client &client, Server &server, Msj msj, std::map<int , Client>& clients){
     (void)server;
     if (!NickNameValide(msj))
     {
-        client.messageToSend = "432 " + client.getNickName() + " :Erroneus nickname\n";
-        client.sendMessage(client.messageToSend);
+        client.sendMessage(ERR_ERRONEUSNICKNAME(msj.args[1]));
+        return ;
     }
     if (check_Dupplicated(msj, clients))
     {
-        client.messageToSend = "433 " + client.getNickName() + " :Nickname is already in use\n";
-        client.sendMessage(client.messageToSend);
+        client.sendMessage(ERR_ALREADYREGISTRED(msj.args[1]));
+        return ;
     }
     std::string OldNickname = client.getNickName();
     client.setNickName(msj.args[0]);
-    client.sendMessage(std::string(" // Broadcast to channels: :<oldnickname> NICK :<newnickname>\n"));
+    prodcastNickUpdated(server, client, OldNickname);
 }
 
 void KillNicknameCollisions(Client& client, std::map<int , Client>& clients)
