@@ -54,7 +54,7 @@ void handle_join(Server &server, Client &client, Msj &msj)
     }
 
     std::string channel_name = msj.args[1]; // First parameter is the channel name
-    if (!channel_name.empty() && channel_name[1] == '#') 
+    if (!channel_name.empty() && (channel_name[0] == '#' || channel_name[0] == '&'))
     {
         channel_name = channel_name.substr(1);
     }
