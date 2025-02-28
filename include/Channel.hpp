@@ -6,7 +6,7 @@
 #include <map>
 #include "Client.hpp"
 #include <algorithm>
-
+#define MAX_CHANNELS 10
 class Client;
 class Channel
 {
@@ -53,6 +53,7 @@ class Channel
 		std::string getKey();
 		std::string getUserList();
 		// bool iSInviteOnly(){return t;}
+		bool isFull(){return members.size() >= 10;}
 		void setKey(std::string newKey);
 		void removeKey();
         void setInviteOnly(bool status);

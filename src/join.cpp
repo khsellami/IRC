@@ -45,89 +45,128 @@
 // }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-void handle_join(Server &server, Client &client, Msj &msj)
+bool isJoinAllowed(Client &client, Channel &channel, const std::string &key)
 {
-    if (msj.args.empty())
-    {
-        client.sendMessage("461 JOIN :Not enough parameters"); // ERR_NEEDMOREPARAMS
-        return;
-    }
-
-    std::string channel_name = msj.args[1]; // First parameter is the channel name
-    if (!channel_name.empty() && (channel_name[0] == '#' || channel_name[0] == '&'))
-    {
-        channel_name = channel_name.substr(1);
-    }
-    std::string key = (msj.args.size() > 1) ? msj.args[1] : ""; // Second parameter is optional key
-
-    std::map<std::string, Channel> &channels = server.getChannels();
-
-    bool is_new_channel = (channels.find(channel_name) == channels.end());
-
-    // Create the channel if it does not exist
-    if (is_new_channel)
-    {
-        std::cout << "Creating new channel: " << channel_name << std::endl;
-        Channel new_channel(channel_name);
-        server.addChannel(channel_name, new_channel);
-    }
-
-    Channel &channel = channels[channel_name];
-
-    // === INVITE-ONLY CHECK ===
     if (channel.iSInviteOnly() && !channel.isInvited(client))
     {
-        client.sendMessage("473 " + channel_name + " :Cannot join channel (+i) - you must be invited"); // ERR_INVITEONLYCHAN
-        return;
+        client.sendMessage("473 " + channel.getName() + " :Cannot join channel (+i) - you must be invited"); // ERR_INVITEONLYCHAN
+        return false;
     }
 
-    // === CHECK IF CLIENT IS BANNED ===
     if (channel.isBanned(client))
     {
-        client.sendMessage("474 " + channel_name + " :Cannot join channel - you are banned"); // ERR_BANNEDFROMCHAN
-        return;
+        client.sendMessage("474 " + channel.getName() + " :Cannot join channel - you are banned"); // ERR_BANNEDFROMCHAN
+        return false;
     }
 
-    // === CHECK IF THE CHANNEL HAS A PASSWORD (KEY) ===
     if (channel.hasKey() && channel.getKey() != key)
     {
-        client.sendMessage("475 " + channel_name + " :Cannot join channel - incorrect key"); // ERR_BADCHANNELKEY
+        client.sendMessage("475 " + channel.getName() + " :Cannot join channel - incorrect key"); // ERR_BADCHANNELKEY
+        return false;
+    }
+
+    if (channel.isMember(client))
+    {
+        client.sendMessage("462 " + client.getName() + " :You are already in this channel.");
+        return false;
+    }
+    if (channel.isFull())
+    {
+        client.sendMessage("471 " + channel.getName() + " :Cannot join channel - channel is full"); // ERR_CHANNELISFULL
+        return false;
+    }
+
+    return true;
+}
+
+
+void sendJoinReplies(Client &client, Channel &channel)
+{
+    if (!channel.getTopic().empty())
+    {
+        client.sendMessage("332 " + client.getName() + " " + channel.getName() + " :" + channel.getTopic()); // RPL_TOPIC
+    }
+    client.sendMessage("353 " + client.getName() + " = " + channel.getName() + " :" + channel.getUserList()); // RPL_NAMREPLY
+    client.sendMessage("366 " + client.getName() + " " + channel.getName() + " :End of /NAMES list"); // RPL_ENDOFNAMES
+}
+bool only_one_channel(const std::vector<std::string> &args)
+{
+    if (args.empty()) 
+        return true;
+
+    std::string channels = args[1];
+
+    for (size_t i = 0; i < channels.size(); i++)
+    {
+        if (channels[i] == ',' && i + 1 < channels.size() && channels[i + 1] == '#')
+            return false;
+    }
+    
+    return true;
+}
+ std::vector<std::string> split(const std::string &s, char delim)
+{
+    std::vector<std::string> result;
+    std::stringstream ss(s);
+    std::string item;
+
+    while (std::getline(ss, item, delim))
+    {
+        result.push_back(item);
+    }
+
+    return result;
+}
+void handle_join(Server &server, Client &client, Msj &msj)
+{
+    if (msj.args[1].empty())
+    {
+        client.sendMessage("461 JOIN :ERR_NEEDMOREPARAMS");
         return;
     }
 
-    // === ADD CLIENT TO CHANNEL ===
-    if (!channel.isMember(client))
+    std::vector<std::string> channels = split(msj.args[1], ',');
+    std::vector<std::string> keys;
+    
+    if (msj.args.size() > 2)
+        keys = split(msj.args[2], ',');
+    
+    for (size_t i = 0; i < channels.size(); i++)
     {
+        std::string channel_name = channels[i];
+        if (channel_name.empty() || (channel_name[0] != '#' && channel_name[0] != '&'))
+        {
+            client.sendMessage("403 " + channel_name + " :ERR_NOSUCHCHANNEL");
+            continue;
+        }
+        channel_name = channel_name.substr(1);
+
+        std::map<std::string, Channel> &channelMap = server.getChannels();
+        bool is_new_channel = (channelMap.find(channel_name) == channelMap.end());
+
+        if (is_new_channel)
+        {
+            std::cout << "Creating new channel: " << channel_name << std::endl;
+            server.addChannel(channel_name, Channel(channel_name));
+        }
+
+        Channel &channel = channelMap[channel_name];
+        std::string key = (i < keys.size()) ? keys[i] : "";
+
+        if (!isJoinAllowed(client, channel, key))
+            continue;
+
         channel.addMember(client);
         
-        // If this is a new channel, make the first client the operator
         if (is_new_channel)
         {
             client.setOperator(true);
             channel.setOperator(client);
             std::cout << client.getName() << " is now the operator of channel: " << channel.getName() << std::endl;
-            std::cout <<"!!!!!!!!!!!!!!!!!"<< client.getIs_operator() << std::endl;
         }
 
         std::cout << client.getName() << " joined channel: " << channel.getName() << std::endl;
-
-        // Send JOIN confirmation to all members
-        channel.broadcast(client.getPrefix() + " JOIN " + channel_name);
-
-        // === SEND TOPIC IF EXISTS ===
-        if (!channel.getTopic().empty())
-        {
-            client.sendMessage("332 " + client.getName() + " " + channel_name + " :" + channel.getTopic()); // RPL_TOPIC
-        }
-
-        // === SEND LIST OF USERS ===
-        std::string user_list = channel.getUserList();
-        client.sendMessage("353 " + client.getName() + " = " + channel_name + " :" + user_list); // RPL_NAMREPLY
-        client.sendMessage("366 " + client.getName() + " " + channel_name + " :End of /NAMES list"); // RPL_ENDOFNAMES
-    }
-    else
-    {
-        client.sendMessage("462 " + client.getName() + " :You are already in this channel.");
+        channel.broadcast(client.getPrefix() + " JOIN #" + channel_name);
+        sendJoinReplies(client, channel);
     }
 }
-

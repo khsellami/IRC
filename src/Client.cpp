@@ -95,3 +95,8 @@ std::string Client::getPrefix()
 {
     return ":" + nickname + "!user@host";
 }
+
+std::set<std::string> Client::getJoinedChannels()
+{
+	return joinedChannels;
+}
