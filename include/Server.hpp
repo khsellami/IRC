@@ -25,6 +25,7 @@ class Server
 
 	public:
 		Server();
+		Channel* getChannel(const std::string& channelName);
 		void	run();
 		Server(int port, const char* password);
 		int getSock() const;

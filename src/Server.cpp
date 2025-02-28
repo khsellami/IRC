@@ -8,6 +8,14 @@ Server::Server(int port, const char* password)
 	this->port = port;
 	this->password = password;
 }
+Channel* Server::getChannel(const std::string& channelName) {
+    std::map<std::string, Channel>::iterator it;
+    for (it = channels.begin(); it != channels.end(); it++) {
+        if (it->first == channelName)
+			return &it->second;
+    }
+    return NULL;
+}
 
 int Server::getSock() const
 {

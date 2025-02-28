@@ -18,10 +18,12 @@ class Channel
 		std::vector<Client> members;
 		std::vector<Client> invited;
 		std::vector<std::string> bannedUsers;
-		//////////MODE//////////
 		std::vector<Client> operators;
+		//////////MODE//////////
 		std::string key;
+		bool is_hasKey;
 		bool inviteOnly;
+		bool topicRestricted;
 		bool t;
 
 	public:
@@ -33,6 +35,12 @@ class Channel
 		std::string  getName();
 		std::string getTopic(){return topic;}
 		std::vector<Client> getMembers();
+		//
+		//some MODE member functions
+		void setTopicRestriction(bool status);
+		std::string getModeString();
+		void __setOperator(std::string Nickname, bool AddorRemove);
+		// bool Channel::canChangeTopic(Client &client);
 		//setters
 		void setTopic(std::string topic);
 		void setName(std::string name);
@@ -46,6 +54,7 @@ class Channel
 		std::string getUserList();
 		// bool iSInviteOnly(){return t;}
 		void setKey(std::string newKey);
+		void removeKey();
         void setInviteOnly(bool status);
 		void broadcast(const std::string &message);
 		bool isBanned(Client &client);
