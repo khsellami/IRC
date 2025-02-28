@@ -1,6 +1,10 @@
 #include "../include/Channel.hpp"
 
-Channel::Channel(){}
+Channel::Channel(){
+    is_hasKey = false;
+    topicRestricted = false;
+    inviteOnly = false;
+}
 
 Channel::Channel(std::string name) : name_channel(name) ,inviteOnly(false) {}
 
@@ -10,7 +14,62 @@ bool Channel::hasKey() { return !key.empty(); }
 
 bool Channel::iSInviteOnly() { return inviteOnly; }
 
-void Channel::setKey(std::string newKey) { key = newKey; }
+void Channel::setTopicRestriction(bool status) {
+    topicRestricted = status;
+}
+
+// bool Channel::canChangeTopic(Client &client) {
+//     return !topicRestricted || isOperator(client);
+// }
+
+void Channel::setKey(std::string newKey) {
+     key = newKey; 
+    is_hasKey = true;
+}
+void Channel::removeKey() {
+   is_hasKey = false;
+   key.clear();
+}
+std::string Channel::getModeString()
+{
+    std::string modeString = "+";
+    
+    if (inviteOnly)
+        modeString += "i";
+    if (topicRestricted)
+        modeString += "t";
+    if (is_hasKey)
+        modeString += "k";
+    
+    return modeString;
+}
+
+void Channel::__setOperator(std::string Nickname, bool AddorRemove)
+{
+    std::vector<Client>::iterator it;
+    Client target;
+    for (it = members.begin(); it != members.end(); it++){
+        if (it->getNickName() == Nickname)
+        {
+            break;
+            target = *it;
+        }
+    }
+    if (!isMember(target))
+    {
+        return ;
+    }
+    if (AddorRemove && std::find(operators.begin(), operators.end(), target) == operators.end())
+    {
+        operators.push_back(target);
+        return ;
+    }
+    else if (!AddorRemove && (it = std::find(operators.begin(), operators.end(), target)) != operators.end())
+    {
+        operators.erase(it);
+    }
+}
+
 void Channel::setInviteOnly(bool status) { inviteOnly = status; }
 void Channel::setName(std::string name) { name_channel = name; }
 bool Channel::isBanned(Client &client)

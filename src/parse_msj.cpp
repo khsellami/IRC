@@ -63,5 +63,9 @@ void parse_message(const std::string &msg1, Client &client, const char* password
 	{
 		handle_privmsg(server, client, msj);
 	}
+	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "MODE")
+	{
+		handleChannelMode(client, msj, server);
+	}
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 }
