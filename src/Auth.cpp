@@ -6,7 +6,7 @@
 /*   By: hmraizik <hmraizik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 11:50:06 by hmraizik          #+#    #+#             */
-/*   Updated: 2025/02/27 23:29:22 by hmraizik         ###   ########.fr       */
+/*   Updated: 2025/02/28 18:28:30 by hmraizik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,16 @@ void broadcastMessageForNick(Client &client, Channel &channel, std::string messa
 {
 	//Extract the members of the channel
 	std::vector <Client> toSend = channel.getMembers();
-	for (size_t i=0 ; i < toSend.size(); i++)
+	for (size_t i=0 ; i < channel.getMembers().size(); i++)
 	{
 		//skip the client that send the message to the channel
-		if (toSend[i].getSocket() == client.getSocket() || toSend[i].has_received)
+		if (channel.getMembers()[i].getSocket() == client.getSocket() || channel.getMembers()[i].has_received == true)
 			continue;
-		toSend[i].sendMessage(message);
-        toSend[i].has_received = true;
+        else if (channel.getMembers()[i].has_received == false)
+        {
+		    channel.getMembers()[i].sendMessage(message);
+            channel.getMembers()[i].has_received = true;
+        }
 	}
 }
 
@@ -61,7 +64,7 @@ bool NickNameValide(Msj command)
 {
     if (command.args[1].empty())
         return false;
-    
+
     if (!isalpha(command.args[1][0]))
         return false;
     
@@ -139,39 +142,37 @@ void check_Names(Client& client, Msj command, std::map<int , Client>& clients){
 }
 
 void reset_hasReceivedBool(Server& server, Client& client){
-    std::map<std::string, Channel> channels = server.getChannels();
-    std::map<std::string, Channel>::iterator it = channels.begin();
+    // std::map<std::string, Channel> channels = server.getChannels();
+    std::map<std::string, Channel>::iterator it = server.getChannels().begin();
 
-    while (it != channels.end()){
+    while (it != server.getChannels().end()){
         if (it->second.isMember(client))
         {
-            std::vector <Client> clients = it->second.getMembers();
-            for (size_t i = 0; i < clients.size(); i++)
+            // std::vector <Client> clients = it->second.getMembers();
+            for (size_t i = 0; i < it->second.getMembers().size(); i++)
             {
-                clients[i].has_received = false;
+                it->second.getMembers()[i].has_received = false;
             }
         }
         ++it;
     }
 }
-void prodcastNickUpdated(Server &server, Client& client, std::string oldNick){
-    std::map<std::string, Channel> channels = server.getChannels();
-    std::map<std::string, Channel>::iterator it = channels.begin();
+void prodcastNickUpdated(Server &server, Client& client, std::string oldNick)
+{
+    std::map<std::string, Channel>::iterator it = server.getChannels().begin();
     std::string message = oldNick + " changed his nickname to " + client.getNickName();
-    while (it != channels.end())
+    while (it != server.getChannels().end())
     {
+        std::cout << it->second.isMember(client) << std::endl;
         if (it->second.isMember(client))
         {
             broadcastMessageForNick(client, it->second, message);
         }
         ++it;
     }
-    // reset `has_received boolean
-    reset_hasReceivedBool(server, client);
 }
 
 void UpdateNickname(Client &client, Server &server, Msj msj, std::map<int , Client>& clients){
-    (void)server;
     if (!NickNameValide(msj))
     {
         client.sendMessage(ERR_ERRONEUSNICKNAME(msj.args[1]));
@@ -179,11 +180,11 @@ void UpdateNickname(Client &client, Server &server, Msj msj, std::map<int , Clie
     }
     if (check_Dupplicated(msj, clients))
     {
-        client.sendMessage(ERR_ALREADYREGISTRED(msj.args[1]));
+        client.sendMessage(ERR_NICKNAMEINUSE(msj.args[1]));
         return ;
     }
     std::string OldNickname = client.getNickName();
-    client.setNickName(msj.args[0]);
+    client.setNickName(msj.args[1]);
     prodcastNickUpdated(server, client, OldNickname);
 }
 

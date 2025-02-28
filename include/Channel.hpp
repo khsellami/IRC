@@ -15,7 +15,7 @@ class Channel
 		//////////TOPIC//////////
 		std::string topic;
 		//////////JOIN//////////
-		std::vector<Client> members;
+		std::vector<Client&> members;
 		std::vector<Client> invited;
 		std::vector<std::string> bannedUsers;
 		//////////MODE//////////
