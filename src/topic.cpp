@@ -86,7 +86,7 @@ void handle_topic(Server &server, Client &client, Msj msj)
 			return ;
 		}
 		//No permissions
-		if (!client.isOp() && !ch.getT())
+		if (!ch.isOperator(client) && ch.getTopicRestriction())
 		{
 			client.sendMessage(ERR_CHANOPRIVSNEEDED(channel_name));
 			return ;

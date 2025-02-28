@@ -47,6 +47,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool isJoinAllowed(Client &client, Channel &channel, const std::string &key)
 {
+    std::cout << channel.isInvited(client) << std::endl;
     if (channel.iSInviteOnly() && !channel.isInvited(client))
     {
         client.sendMessage("473 " + channel.getName() + " :Cannot join channel (+i) - you must be invited"); // ERR_INVITEONLYCHAN
@@ -160,7 +161,6 @@ void handle_join(Server &server, Client &client, Msj &msj)
         
         if (is_new_channel)
         {
-            client.setOperator(true);
             channel.setOperator(client);
             std::cout << client.getName() << " is now the operator of channel: " << channel.getName() << std::endl;
         }

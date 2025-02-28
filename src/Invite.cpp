@@ -6,6 +6,15 @@
 #include <vector> 
 
 
+bool checkChannelExist(std::map<std::string, Channel> &channels, std::string channel_name)
+{
+    for (std::map<std::string, Channel>::iterator it = channels.begin(); it != channels.end(); ++it)
+    {
+        if (it->first == channel_name)
+            return true;
+    }
+    return false;
+}
 
 void handle_invite(Server &server, Client &client, Msj &msj)
 {
@@ -16,7 +25,8 @@ void handle_invite(Server &server, Client &client, Msj &msj)
     }
 
     std::string target_nickname = msj.args[1]; // The client to invite
-    std::string channel_name = msj.args[2];    // The channel
+
+    std::string channel_name =  (msj.args[2][0] == '#' || msj.args[2][0] == '&') ? msj.args[2].substr(1) : msj.args[2];
 
     // Verify if the target user exists
     Client *target_client = server.getClientByName(target_nickname);
@@ -25,8 +35,7 @@ void handle_invite(Server &server, Client &client, Msj &msj)
         client.sendMessage("401 " + target_nickname + " :// ERR_NOSUCHNICK");
         return;
     }
-    std::map<std::string, Channel> &channels = server.getChannels();
-    if (channels.find(channel_name) == channels.end())
+    if (checkChannelExist(server.getChannels(), channel_name) == false)
     {
         client.sendMessage("341 :" + client.getNickName() + " " + target_nickname + " " + channel_name);
         target_client->sendMessage(":" + client.getNickName() + " INVITE " + target_nickname + " " + channel_name);
@@ -34,7 +43,7 @@ void handle_invite(Server &server, Client &client, Msj &msj)
         return;
     }
 
-    Channel &channel = channels[channel_name];
+    Channel &channel = server.getChannels()[channel_name];
     if (!channel.isMember(client))
     {
         client.sendMessage("442 " + channel_name + " :ERR_NOTONCHANNEL");
@@ -55,5 +64,3 @@ void handle_invite(Server &server, Client &client, Msj &msj)
     target_client->sendMessage(":" + client.getNickName() + " INVITE " + target_nickname + " " + channel_name);
     std::cout << "[INVITE] " << client.getNickName() << " invited " << target_nickname << " to " << channel_name << std::endl;
 }
-
-

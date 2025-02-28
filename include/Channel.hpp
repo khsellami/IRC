@@ -7,6 +7,7 @@
 #include "Client.hpp"
 #include <algorithm>
 #define MAX_CHANNELS 10
+
 class Client;
 class Channel
 {
@@ -24,14 +25,12 @@ class Channel
 		bool is_hasKey;
 		bool inviteOnly;
 		bool topicRestricted;
-		bool t;
 
 	public:
-	//constructors
 		Channel();
 		Channel(std::string name);
 		//getters
-		bool getT();
+		bool getTopicRestriction();
 		std::string  getName();
 		std::string getTopic(){return topic;}
 		std::vector<Client> getMembers();
@@ -40,19 +39,32 @@ class Channel
 		void setTopicRestriction(bool status);
 		std::string getModeString();
 		void __setOperator(std::string Nickname, bool AddorRemove);
-		// bool Channel::canChangeTopic(Client &client);
 		//setters
 		void setTopic(std::string topic);
 		void setName(std::string name);
-		bool isInvited(Client &client){return std::find(invited.begin(), invited.end(), client) != invited.end();}
-		// bool isOperator(const Client &client) const { return std::find(operators.begin(), operators.end(), client) != operators.end(); }
+		bool isInvited(Client &client)
+		{
+			for (size_t i = 0; i < invited.size(); i++)
+			{
+				if (invited[i].getNickName() == client.getNickName())
+					return true;
+			}
+			return false;
+		}
 		void setOperator(Client &client);
-		bool isOperator(Client &client){return std::find(operators.begin(), operators.end(), client) != operators.end();}
+		bool isOperator(Client &client)
+		{
+			for (size_t i = 0; i < operators.size(); i++)
+			{
+				if (operators[i].getNickName() == client.getNickName())
+					return true;
+			}
+			return false;
+		}
 		bool iSInviteOnly();
         bool hasKey();
 		std::string getKey();
 		std::string getUserList();
-		// bool iSInviteOnly(){return t;}
 		bool isFull(){return members.size() >= 10;}
 		void setKey(std::string newKey);
 		void removeKey();

@@ -82,7 +82,6 @@ std::string Client::getName(){
 	return this->username;
 }
 
-bool Client::isOp(){return is_op;}
 void Client::sendMessage(const std::string &message)
 {
     std::string formattedMessage = message + "\r\n"; // Format IRC

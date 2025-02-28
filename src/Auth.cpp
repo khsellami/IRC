@@ -201,9 +201,11 @@ void KillNicknameCollisions(Client& client, std::map<int , Client>& clients)
     }
 }
 
-void handle_authentification(Client &client, std::string password, Msj msj, std::map<int , Client>& clients, Server& server)
+void handle_authentification(Client &client, Msj msj, Server& server)
 {
     // Already registred
+    msj.args[0] = toUpper(msj.args[0]);
+
     if (client.getIs_auth() == true)
     {
         if (msj.args[0] == "PASS" || msj.args[0] == "USER")
@@ -217,7 +219,7 @@ void handle_authentification(Client &client, std::string password, Msj msj, std:
     }
     if (msj.args[0] == "NICK" && client.is_NICK && client.is_PASS)
     {
-        UpdateNickname(client, server, msj, clients);
+        UpdateNickname(client, server, msj, server.getClients());
     }
     /****** trying other command before registering *************************/
     if (client.getIs_auth() == false && msj.args[0] != "PASS" && msj.args[0] != "NICK" && msj.args[0] != "USER")
@@ -236,18 +238,18 @@ void handle_authentification(Client &client, std::string password, Msj msj, std:
     }
     if (!(client.getIs_auth()) && msj.args[0] == "PASS")
     {
-        check_Password(client, password, msj);
+        check_Password(client, server.getPassword(), msj);
         return ;
     }
     if (!(client.getIs_auth()) && client.is_PASS)
     {
-        check_Names(client, msj, clients);
+        check_Names(client, msj, server.getClients());
     }
     // verify if auth complited
     if (!(client.getIs_auth()) && client.is_PASS && client.is_NICK && client.is_USER)
     {
         client.setIs_auth(true);
-        KillNicknameCollisions(client, clients);
+        KillNicknameCollisions(client, server.getClients());
 
         client.messageToSend = "Welcome, You have registred succesfully!\n";
         client.sendMessage(client.messageToSend);

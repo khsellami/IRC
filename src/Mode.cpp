@@ -6,10 +6,14 @@
 
 
 
-void handleChannelMode(Client &client, Msj msj, Server &server) {
+void handleChannelMode(Client &client, Msj msj, Server &server)
+{
     //MODE #channel +t/i/o...
-    Channel* channel = server.getChannel(msj.args[1]);
-    if (!channel) {
+
+    std::string channel_name = (msj.args[1][0] == '#' || msj.args[1][0] == '&') ? msj.args[1].substr(1) : msj.args[1];
+    Channel* channel = server.getChannel(channel_name);
+    if (!channel) 
+    {
         client.sendMessage(ERR_NOSUCHCHANNEL(msj.args[1]));
         return ;
     }
@@ -41,7 +45,7 @@ void handleChannelMode(Client &client, Msj msj, Server &server) {
             adding = false;
             continue;
         }// need more handling more cases in parse here '++t, ---t ...'
-        
+
         switch(modes[i]) {
             case 'i':
                 channel->setInviteOnly(adding);
@@ -56,7 +60,8 @@ void handleChannelMode(Client &client, Msj msj, Server &server) {
                     channel->removeKey();
                 break;
             case 'o':
-                if (argIndex < msj.args.size()) {
+                if (argIndex < msj.args.size())
+                {
                     std::string targetNick = msj.args[argIndex++];
                     channel->__setOperator(targetNick, adding);
                 }
