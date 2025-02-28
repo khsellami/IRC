@@ -3,7 +3,7 @@
 
 Server::Server(){}
 
-Server::Server(int port, const char* password)
+Server::Server(int port, std::string password)
 {
 	this->port = port;
 	this->password = password;
@@ -129,7 +129,7 @@ void Server::connect_client(Server &server)
 				buffer[bytesRead] = '\0';
 				std::string message(buffer);
 				std::cout << "Client " << fds[i].fd << " sent: " << message << '\n';
-				parse_message(message, clients[fds[i].fd], password, clients, server, channels);
+				parse_message(message, clients[fds[i].fd], server);
 			}
 		}
 	}
@@ -159,3 +159,7 @@ Client* Server::getClientByName(const std::string &name)
 	}
 	return NULL;
 }
+std::string Server::getPassword(){
+	return password;
+}
+std::map<int , Client>& Server::getClients(){return clients;}
