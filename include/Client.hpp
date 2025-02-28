@@ -50,6 +50,7 @@ class Client
 		void setServername(std::string Servername);
 		void setRealname(std::string Realname);
 		void setIs_auth(bool value);
+		
 		//getters
 		std::string getHostname();
 		std::string getRealname();
