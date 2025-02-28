@@ -2,6 +2,7 @@
 #define CLIENT_HPP
 
 #include <iostream>
+#include <set>
 #define PASS_VALIDATED 0
 #define NICK_VALIDATED 1
 #define USER_VALIDATED 2
@@ -26,6 +27,7 @@ class Client
 		//////////INVITE//////////
 		int Mode_in_channel;
 		bool is_op;
+		std::set<std::string> joinedChannels;
 	public:
 	//////////AUTHENTIFICATE//////////
 		bool is_PASS;
@@ -63,6 +65,7 @@ class Client
 				is_op = false;
 		}
 		std::string getPrefix();
+		std::set<std::string> getJoinedChannels();
 };
 
 #endif
