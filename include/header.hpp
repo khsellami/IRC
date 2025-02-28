@@ -7,6 +7,7 @@
 #include "Reply.hpp"
 
 void handle_authentification(Client &client, std::string password, Msj msj, std::map<int , Client>& clients, Server& server);
+void handleChannelMode(Client &client, Msj msj, Server &server);
 void parse_message(const std::string &msg1, Client &client, const char* password, std::map<int , Client> clients, Server &server, std::map<std::string, Channel> channels);
 
 ///////////////////////////////////////////////////////////
@@ -18,7 +19,7 @@ void handle_privmsg(Server &server, Client &client, Msj msj);
 
 void handle_join(Server &server, Client &client, Msj &msj);
 void handle_invite(Server &server, Client &client, Msj &msj);
-void handle_authentification(Client &client, std::string password, Msj msj, std::map<int , Client> clients);
+// void handle_authentification(Client &client, std::string password, Msj msj, std::map<int , Client> clients);
 void broadcastMessage(Client &client, Channel &channel, std::string message);
 std::string geting_message(const std::string &msg);
 

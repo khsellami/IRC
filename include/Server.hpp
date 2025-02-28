@@ -1,12 +1,13 @@
 #ifndef Server_HPP
 #define Server_HPP
 
+#include <cstdio>
 #include <poll.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <map>
-#include "Server.hpp"
+// #include "Server.hpp"
 #include "Client.hpp"
 #include "Channel.hpp"
 #include "Msj.hpp"
@@ -24,6 +25,7 @@ class Server
 
 	public:
 		Server();
+		Channel* getChannel(const std::string& channelName);
 		void	run();
 		Server(int port, const char* password);
 		int getSock() const;
