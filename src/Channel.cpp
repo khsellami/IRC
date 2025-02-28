@@ -110,7 +110,15 @@ void Channel::addMember(Client &client)
 
 bool Channel::isMember(Client &client)
 {
-    return std::find(members.begin(), members.end(), client) != members.end();
+    // return std::find(members.begin(), members.end(), client) != members.end();
+    for (size_t i = 0; i < members.size(); i++)
+    {
+        if (members[i].getSocket() == client.getSocket())
+        {
+            return true;
+        }
+    }
+    return false;
 }
 std::string Channel::getKey()
 {
