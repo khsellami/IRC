@@ -99,6 +99,19 @@ bool Channel::isBanned(Client &client)
     return std::find(bannedUsers.begin(), bannedUsers.end(), client.getName()) != bannedUsers.end();
 }
 
+void Channel::removeMember(Client &client)
+{
+    std::vector<Client>::iterator it;
+    for (it = members.begin(); it != members.end(); it++)
+    {
+        if (it->getNickName() == client.getNickName())
+        {
+            members.erase(it);
+            break;
+        }
+    }
+}
+
 std::string Channel::getUserList()
 {
     std::string list;

@@ -154,7 +154,7 @@ Client* Server::getClientByName(const std::string &name)
 {
 	for (size_t i = 0; i < clients.size(); i++)
 	{
-		if (clients[i].getName() == name)
+		if (clients[i].getNickName() == name)
 			return &clients[i];
 	}
 	return NULL;
