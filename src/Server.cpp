@@ -64,6 +64,7 @@ void	Server::run()
 
 void Server::connect_client(Server &server)
 {
+	try {
 	struct pollfd new_poll;
 	new_poll.fd = server.getSock();
 	new_poll.events = POLLIN;
@@ -133,9 +134,14 @@ void Server::connect_client(Server &server)
 			}
 		}
 	}
+	}
+	catch(const char *e)
+	{
 	for (size_t i = 0; i < fds.size(); i++)
 	{
 		close(fds[i].fd);
+	}
+	exit(1);
 	}
 }
 

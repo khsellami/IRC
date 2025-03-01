@@ -14,12 +14,9 @@ void handleKickCommand(Client &client, Msj msj, Server &server)
 		client.sendMessage(ERR_NOSUCHCHANNEL(channel_name));
 		return ;
 	}
+	channel_name =  msj.args[1].substr(1);
 	std::string target = msj.args[2];
-	std::string reason = msj.args.size() > 3 ? msj.args[3] : "Kicked";
-	if (reason[0] == ':')
-	{
-		reason = reason.substr(1);
-	}
+	std::string reason = msj.args.size() > 3 ? geting_message(msj.orig_msg) : "Kicked";
 	// i just check first if the channel exist
 	Channel *channel = server.getChannel(channel_name);
 	if (!channel)
@@ -102,5 +99,10 @@ void parse_message(const std::string &msg1, Client &client, Server &server)
 	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "KICK")
 	{
 		handleKickCommand(client, msj, server);
+	}
+	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "Q")
+	{
+		// exit (1);
+		throw "error";
 	}
 }
