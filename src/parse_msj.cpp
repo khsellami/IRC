@@ -91,6 +91,10 @@ void parse_message(const std::string &msg1, Client &client, Server &server)
 	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "PRIVMSG")
 	{
 		handle_privmsg(server, client, msj);
+		if (msj.args.size() > 2 && toUpper(msj.args[1]) == ":DCC" && toUpper(msj.args[2]) == "SEND") 
+		{
+			handleDCCSend(client, msj.args);
+		}
 	}
 	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "MODE")
 	{
@@ -100,9 +104,10 @@ void parse_message(const std::string &msg1, Client &client, Server &server)
 	{
 		handleKickCommand(client, msj, server);
 	}
+
 	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "Q")
 	{
-		// exit (1);
+			// exit (1);
 		throw "error";
 	}
 }

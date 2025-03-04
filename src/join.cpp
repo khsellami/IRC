@@ -4,6 +4,7 @@
 #include "../include/Channel.hpp"
 #include <iostream>
 #include <vector>
+#include "../include/Reply.hpp"
 
 // it swrks
 
@@ -50,30 +51,31 @@ bool isJoinAllowed(Client &client, Channel &channel, const std::string &key)
     std::cout << channel.isInvited(client) << std::endl;
     if (channel.iSInviteOnly() && !channel.isInvited(client))
     {
-        client.sendMessage("473 " + channel.getName() + " :Cannot join channel (+i) - you must be invited"); // ERR_INVITEONLYCHAN
+        client.sendMessage(ERR_INVITEONLYCHAN(client.getName(), channel.getName()));
         return false;
     }
 
     if (channel.isBanned(client))
     {
-        client.sendMessage("474 " + channel.getName() + " :Cannot join channel - you are banned"); // ERR_BANNEDFROMCHAN
+        client.sendMessage(ERR_BANNEDFROMCHAN(channel.getName(), client.getName()));
         return false;
     }
 
     if (channel.hasKey() && channel.getKey() != key)
     {
-        client.sendMessage("475 " + channel.getName() + " :Cannot join channel - incorrect key"); // ERR_BADCHANNELKEY
+        client.sendMessage(ERR_BADCHANNELKEY(channel.getName(), client.getName()));
         return false;
     }
 
     if (channel.isMember(client))
     {
-        client.sendMessage("462 " + client.getName() + " :You are already in this channel.");
+        client.sendMessage(ERR_ALREADYREGISTRED(client.getName()));
         return false;
     }
+
     if (channel.isFull())
     {
-        client.sendMessage("471 " + channel.getName() + " :Cannot join channel - channel is full"); // ERR_CHANNELISFULL
+        client.sendMessage(ERR_CHANNELISFULL(client.getName(), channel.getName()));
         return false;
     }
 
@@ -81,15 +83,17 @@ bool isJoinAllowed(Client &client, Channel &channel, const std::string &key)
 }
 
 
+
 void sendJoinReplies(Client &client, Channel &channel)
 {
     if (!channel.getTopic().empty())
     {
-        client.sendMessage("332 " + client.getName() + " " + channel.getName() + " :" + channel.getTopic()); // RPL_TOPIC
+        client.sendMessage(RPL_TOPIC(client.getName(), channel.getName(), channel.getTopic()));
     }
-    client.sendMessage("353 " + client.getName() + " = " + channel.getName() + " :" + channel.getUserList()); // RPL_NAMREPLY
-    client.sendMessage("366 " + client.getName() + " " + channel.getName() + " :End of /NAMES list"); // RPL_ENDOFNAMES
+    client.sendMessage(RPL_NAMREPLY(client.getName(), channel.getName(), channel.getUserList()));
+    client.sendMessage(RPL_ENDOFNAMES(client.getName(), channel.getName()));
 }
+
 bool only_one_channel(const std::vector<std::string> &args)
 {
     if (args.empty()) 
@@ -122,7 +126,7 @@ void handle_join(Server &server, Client &client, Msj &msj)
 {
     if (msj.args[1].empty())
     {
-        client.sendMessage("461 JOIN :ERR_NEEDMOREPARAMS");
+        client.sendMessage(ERR_NEEDMOREPARAMS(client.getName()));
         return;
     }
 
@@ -137,7 +141,7 @@ void handle_join(Server &server, Client &client, Msj &msj)
         std::string channel_name = channels[i];
         if (channel_name.empty() || (channel_name[0] != '#' && channel_name[0] != '&'))
         {
-            client.sendMessage("403 " + channel_name + " :ERR_NOSUCHCHANNEL");
+            client.sendMessage(ERR_NOSUCHCHANNEL(channel_name));
             continue;
         }
         channel_name = channel_name.substr(1);
