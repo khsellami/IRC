@@ -2,153 +2,192 @@
 #include "../include/Client.hpp"
 #include "../include/Msj.hpp"
 #include "../include/Channel.hpp"
-#include <iostream>
 #include <vector>
 #include <sstream>
+#include <fstream>
 
-#include <fstream> 
-void handleDCCSend(Client &client, std::vector<std::string> args) {
-	if (args.size() < 6) {
-		client.sendMessage("Erreur : Format incorrect. Utilisation : PRIVMSG <destinataire> :DCC SEND <fichier> <ip> <port> <taille>");
-		return;
-	}
 
-	std::string filename = args[3];       // Nom du fichier
-	std::string ip_str = args[4];         // IP en uint32_t (ex: 2130706433 pour 127.0.0.1)
-	int port = std::stoi(args[5]);        // Port TCP
-	// int filesize = std::stoi(args[6]);    // Taille du fichier
 
-	// Convertir l'IP en string
-	struct in_addr addr;
-	addr.s_addr = htonl(std::stoul(ip_str));
-	std::string ip = inet_ntoa(addr);
 
-	// Vérifie si le fichier existe
-	std::ifstream file(filename, std::ios::binary);
-	if (!file.is_open()) {
-		client.sendMessage("Erreur : Impossible d'ouvrir le fichier " + filename);
-		return;
-	}
+void startFileTransfer(const std::string &filename, int port)// this function : Crée un serveur qui envoie un fichier via un socket TCP.
+{
+    int server_fd, new_socket;
+    struct sockaddr_in address;
+    int addrlen = sizeof(address);
 
-	// Création d'un socket TCP
-	int server_socket = socket(AF_INET, SOCK_STREAM, 0);
-	if (server_socket == -1) {
-		client.sendMessage("Erreur : Impossible de créer un socket DCC.");
-		return;
-	}
-
-	// Liaison au port
-	struct sockaddr_in server_addr;
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_addr.s_addr = INADDR_ANY;
-	server_addr.sin_port = htons(port);
-
-	if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-		client.sendMessage("Erreur : Bind échoué sur le port " + std::to_string(port));
-		close(server_socket);
-		return;
-	}
-
-	// Écoute sur le port
-	listen(server_socket, 1);
-	client.sendMessage("DCC : Serveur prêt à envoyer " + filename + " sur " + ip + ":" + std::to_string(port));
-
-	// Attente de connexion du client
-	struct sockaddr_in client_addr;
-	socklen_t client_len = sizeof(client_addr);
-	int client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &client_len);
-	if (client_socket < 0) {
-		client.sendMessage("Erreur : Échec de la connexion DCC.");
-		close(server_socket);
-		return;
-	}
-
-	// Envoi du fichier
-	char buffer[1024];
-	while (!file.eof()) {
-		file.read(buffer, sizeof(buffer));
-		int bytesRead = file.gcount();
-		send(client_socket, buffer, bytesRead, 0);
-	}
-
-	client.sendMessage("DCC : Envoi terminé !");
-	file.close();
-	close(client_socket);
-	close(server_socket);
-}
-
-void sendFile(const std::string &filename, int port) {
-    int server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == -1) {
-        std::cerr << "Erreur lors de la création du socket !" << std::endl;
+        perror("❌ Échec de la création du socket");
         return;
     }
 
-    sockaddr_in server_addr;
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(port);
+    int opt = 1;
+    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
-    if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-        std::cerr << "Erreur lors du bind !" << std::endl;
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(port);
+
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
+    {
+        perror("❌ Échec du bind");
+        close(server_fd);
         return;
     }
 
-    listen(server_fd, 1);
-    std::cout << "En attente d'une connexion pour envoyer " << filename << "..." << std::endl;
+    if (listen(server_fd, 1) < 0) {
+        perror("❌ Échec du listen");
+        close(server_fd);
+        return;
+    }
 
-    int client_fd = accept(server_fd, nullptr, nullptr);
-    if (client_fd < 0) {
-        std::cerr << "Erreur lors de l'acceptation !" << std::endl;
+    std::cout << "✅ Serveur DCC SEND en attente sur le port " << port << "..." << std::endl;
+
+    new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen);
+    if (new_socket < 0) {
+        perror("❌ Échec de l'accept");
+        close(server_fd);
         return;
     }
 
     std::ifstream file(filename, std::ios::binary);
     if (!file) {
-        std::cerr << "Erreur : fichier introuvable !" << std::endl;
+        perror("❌ Impossible d'ouvrir le fichier");
+        close(new_socket);
+        close(server_fd);
         return;
     }
 
     char buffer[1024];
-    while (file.read(buffer, sizeof(buffer)) || file.gcount() > 0) {
-        send(client_fd, buffer, file.gcount(), 0);
+    while (!file.eof()) {
+        file.read(buffer, sizeof(buffer));
+        size_t bytesRead = file.gcount();
+        send(new_socket, buffer, bytesRead, 0);
     }
 
-    std::cout << "Fichier envoyé !" << std::endl;
-
-    close(client_fd);
+    file.close();
+    close(new_socket);
     close(server_fd);
+    std::cout << "✅ Transfert de fichier terminé." << std::endl;
 }
-void receiveFile(const std::string &filename, const std::string &ip, int port) {
+
+void receiveFile(const std::string &ip, int port)// this : Se connecte à ce serveur et reçoit le fichier envoyé.
+{
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1) {
-        std::cerr << "Erreur de création du socket !" << std::endl;
+        perror("❌ Échec de la création du socket");
         return;
     }
 
-    sockaddr_in server_addr;
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(port);
-    inet_pton(AF_INET, ip.c_str(), &server_addr.sin_addr);
+    struct sockaddr_in server;
+    server.sin_family = AF_INET;
+    server.sin_port = htons(port);
 
-    if (connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-        std::cerr << "Erreur de connexion au serveur !" << std::endl;
+    if (inet_pton(AF_INET, ip.c_str(), &server.sin_addr) <= 0) {
+        perror("❌ Adresse IP invalide");
+        close(sock);
         return;
     }
 
-    std::ofstream file(filename, std::ios::binary);
-    if (!file) {
-        std::cerr << "Erreur de création du fichier !" << std::endl;
+    std::cout << "✅ Connexion au serveur DCC sur " << ip << ":" << port << "..." << std::endl;
+
+    if (connect(sock, (struct sockaddr *)&server, sizeof(server)) == -1) {
+        perror("❌ Échec de la connexion");
+        close(sock);
+        return;
+    }
+
+    std::ofstream outputFile("received_file.txt", std::ios::binary);
+    if (!outputFile) {
+        perror("❌ Impossible de créer le fichier");
+        close(sock);
         return;
     }
 
     char buffer[1024];
     int bytesReceived;
     while ((bytesReceived = recv(sock, buffer, sizeof(buffer), 0)) > 0) {
-        file.write(buffer, bytesReceived);
+        outputFile.write(buffer, bytesReceived);
     }
 
-    std::cout << "Fichier reçu !" << std::endl;
-
+    outputFile.close();
     close(sock);
+    std::cout << "✅ Fichier reçu avec succès et sauvegardé sous 'received_file.txt'." << std::endl;
 }
+
+
+
+struct FileTransferArgs {
+    std::string filename;
+    int port;
+};
+//startFileTransferWrapper / receiveFileWrapper → Wrappers pour utiliser pthread_create.
+void* startFileTransferWrapper(void* arg) {
+    FileTransferArgs* args = static_cast<FileTransferArgs*>(arg);
+    startFileTransfer(args->filename, args->port);
+    delete args;
+    return NULL;
+}
+
+struct ReceiveFileArgs {
+    std::string ip;
+    int port;
+};
+
+void* receiveFileWrapper(void* arg) {
+    ReceiveFileArgs* args = static_cast<ReceiveFileArgs*>(arg);
+    receiveFile(args->ip, args->port);
+    delete args;
+    return NULL;
+}
+//handleDCCSend → Détecte un message IRC DCC SEND, extrait les infos et lance deux threads pour gérer le transfert.
+void handleDCCSend(Client &sender, const std::string &message) {
+    (void)sender;
+
+    std::istringstream iss(message);
+    std::string command, target, dcc_line;
+
+    iss >> command >> target;
+    std::getline(iss, dcc_line);
+
+    if (dcc_line[0] == ' ')
+        dcc_line = dcc_line.substr(1);
+    if (dcc_line[0] == ':')
+        dcc_line = dcc_line.substr(1);
+
+    std::istringstream dcc_stream(dcc_line);
+    std::string dcc, send, filename, ip_str, port_str, size_str;
+
+    dcc_stream >> dcc >> send >> filename >> ip_str >> port_str >> size_str;
+
+    if (dcc != "DCC" || send != "SEND") {
+        std::cout << "❌ Format DCC SEND invalide !" << std::endl;
+        return;
+    }
+
+    int port = std::atoi(port_str.c_str());
+    std::cout << "✅ DCC SEND détecté ! 📂 Fichier: " << filename << ", 📡 Port: " << port << std::endl;
+    pthread_t senderThread;
+    FileTransferArgs* senderArgs = new FileTransferArgs;
+    senderArgs->filename = filename;
+    senderArgs->port = port;
+    pthread_create(&senderThread, NULL, startFileTransferWrapper, senderArgs);
+
+    sleep(2);
+    pthread_t receiverThread;
+    ReceiveFileArgs* receiverArgs = new ReceiveFileArgs;
+    receiverArgs->ip = ip_str;
+    receiverArgs->port = port;
+    pthread_create(&receiverThread, NULL, receiveFileWrapper, receiverArgs);
+    pthread_detach(senderThread);
+    pthread_detach(receiverThread);
+}
+
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////
+
+
