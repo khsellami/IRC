@@ -78,7 +78,7 @@ void send_channel(std::string recv, Server &server, Client &client, std::string 
 }
 
 //****Send User***********************************//
-void send_user(std::string recv, Server &server, std::string message)
+void send_user(std::string recv, Server &server, std::string message,Client &client)
 {
 	Client *c = server.getClientByName(recv);
 	//if the client exist in clients inside srever send it a message[recv]
@@ -89,7 +89,7 @@ void send_user(std::string recv, Server &server, std::string message)
 	}
 	else
 	{
-		c->sendMessage(ERR_NOSUCHNICK(recv));
+		client.sendMessage(ERR_NOSUCHNICK(recv));
 	}
 
 
@@ -175,7 +175,7 @@ void handle_privmsg(Server &server, Client &client, Msj msj)
 		}
 		else
 		{
-			send_user(receivers[i], server, message);
+			send_user(receivers[i], server, message,client);
 			/*
 			send_user() pseudo-code:
 				1.check if the nick name of user exist in the server ==>> ERR_NOSUCHNICK
