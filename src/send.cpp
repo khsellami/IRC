@@ -17,7 +17,7 @@ void startFileTransfer(const std::string &filename, int port)// this function : 
 
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == -1) {
-        perror("❌ Échec de la création du socket");
+        perror(" Échec de la création du socket");
         return;
     }
 
@@ -30,29 +30,29 @@ void startFileTransfer(const std::string &filename, int port)// this function : 
 
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
     {
-        perror("❌ Échec du bind");
+        perror(" Échec du bind");
         close(server_fd);
         return;
     }
 
     if (listen(server_fd, 1) < 0) {
-        perror("❌ Échec du listen");
+        perror(" Échec du listen");
         close(server_fd);
         return;
     }
 
-    std::cout << "✅ Serveur DCC SEND en attente sur le port " << port << "..." << std::endl;
+    std::cout << " Serveur DCC SEND en attente sur le port " << port << "..." << std::endl;
 
     new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen);
     if (new_socket < 0) {
-        perror("❌ Échec de l'accept");
+        perror(" Échec de l'accept");
         close(server_fd);
         return;
     }
 
     std::ifstream file(filename, std::ios::binary);
     if (!file) {
-        perror("❌ Impossible d'ouvrir le fichier");
+        perror(" Impossible d'ouvrir le fichier");
         close(new_socket);
         close(server_fd);
         return;
@@ -68,14 +68,14 @@ void startFileTransfer(const std::string &filename, int port)// this function : 
     file.close();
     close(new_socket);
     close(server_fd);
-    std::cout << "✅ Transfert de fichier terminé." << std::endl;
+    std::cout << " Transfert de fichier terminé." << std::endl;
 }
 
 void receiveFile(const std::string &ip, int port)// this : Se connecte à ce serveur et reçoit le fichier envoyé.
 {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1) {
-        perror("❌ Échec de la création du socket");
+        perror(" Échec de la création du socket");
         return;
     }
 
@@ -84,22 +84,24 @@ void receiveFile(const std::string &ip, int port)// this : Se connecte à ce ser
     server.sin_port = htons(port);
 
     if (inet_pton(AF_INET, ip.c_str(), &server.sin_addr) <= 0) {
-        perror("❌ Adresse IP invalide");
+        perror(" Adresse IP invalide");
         close(sock);
         return;
     }
 
-    std::cout << "✅ Connexion au serveur DCC sur " << ip << ":" << port << "..." << std::endl;
+    std::cout << " Connexion au serveur DCC sur " << ip << ":" << port << "..." << std::endl;
 
-    if (connect(sock, (struct sockaddr *)&server, sizeof(server)) == -1) {
-        perror("❌ Échec de la connexion");
+    if (connect(sock, (struct sockaddr *)&server, sizeof(server)) == -1)
+    {
+        perror(" Échec de la connexion");
         close(sock);
         return;
     }
 
     std::ofstream outputFile("received_file.txt", std::ios::binary);
-    if (!outputFile) {
-        perror("❌ Impossible de créer le fichier");
+    if (!outputFile)
+    {
+        perror(" Impossible de créer le fichier");
         close(sock);
         return;
     }
@@ -112,7 +114,7 @@ void receiveFile(const std::string &ip, int port)// this : Se connecte à ce ser
 
     outputFile.close();
     close(sock);
-    std::cout << "✅ Fichier reçu avec succès et sauvegardé sous 'received_file.txt'." << std::endl;
+    std::cout << " Fichier reçu avec succès et sauvegardé sous 'received_file.txt'." << std::endl;
 }
 
 
@@ -161,12 +163,12 @@ void handleDCCSend(Client &sender, const std::string &message) {
     dcc_stream >> dcc >> send >> filename >> ip_str >> port_str >> size_str;
 
     if (dcc != "DCC" || send != "SEND") {
-        std::cout << "❌ Format DCC SEND invalide !" << std::endl;
+        std::cout << " Format DCC SEND invalide !" << std::endl;
         return;
     }
 
     int port = std::atoi(port_str.c_str());
-    std::cout << "✅ DCC SEND détecté ! 📂 Fichier: " << filename << ", 📡 Port: " << port << std::endl;
+    std::cout << " DCC SEND détecté !  Fichier: " << filename << ",  Port: " << port << std::endl;
     pthread_t senderThread;
     FileTransferArgs* senderArgs = new FileTransferArgs;
     senderArgs->filename = filename;
@@ -182,12 +184,3 @@ void handleDCCSend(Client &sender, const std::string &message) {
     pthread_detach(senderThread);
     pthread_detach(receiverThread);
 }
-
-
-
-
-
-
-/////////////////////////////////////////////////////////////////////////
-
-

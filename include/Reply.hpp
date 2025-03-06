@@ -46,9 +46,11 @@
 #define RPL_CHANGEMODE(hostname, channelname, mode)		(":" + hostname + " MODE " + channelname + " " + mode + POSTFIX)
 #define RPL_UMODEIS(hostname, channelname, mode, user)	":" + hostname + " MODE " + channelname + " " + mode + " " + user + POSTFIX
 
-//////////ADDED:
+//////////ADDED:////////////////////////////////////////
+//PRIVMSG
 #define ERR_CANNOTSENDTOCHAN(channel)  PREFIX "404 " + channel + " :Cannot send to channel" + POSTFIX 
-#define ERR_TOOMANYTARGETS(target) "407 " + target + " :Too many recipients"
+#define ERR_TOOMANYTARGETS()			PREFIX "407 :Too many targets" POSTFIX 
+///////////
 ///////ana li zadt hado 3la hsab join o rah hazithom mn file lakhor dyal reply
 #define ERR_BANNEDFROMCHAN(client, channel)  PREFIX "474 " + client + " " + channel + " :Cannot join channel (+b)" POSTFIX
 #define ERR_BADCHANNELKEY(client, channel)   PREFIX "475 " + client + " " + channel + " :Cannot join channel (+k)" POSTFIX

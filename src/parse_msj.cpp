@@ -41,7 +41,6 @@ void handleKickCommand(Client &client, Msj msj, Server &server)
 		client.sendMessage(ERR_USERNOTINCHANNEL(target, channel_name));
 		return ;
 	}
-
 	channel->removeMember(*targetClient);
 	targetClient->sendMessage(":" + client.getNickName() + " KICK " + channel_name + " " + target + " :" + reason + "\n");
 	broadcastMessage(client, *channel, ":" + client.getNickName() + " KICK " + channel_name + " " + target + " :" + reason + "\n");
@@ -76,46 +75,20 @@ void parse_message(const std::string &msg1, Client &client, Server &server)
 	handle_authentification(client, msj, server);
 	if (client.getIs_auth() == false)
 		return ;
-	if (msj.args.size() > 0 && toUpper(msj.args[0]) == "JOIN")
-	{
+	if (toUpper(msj.args[0]) == "JOIN")
 		handle_join(server, client, msj);
-	}
-	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "INVITE")
-	{
+	else if (toUpper(msj.args[0]) == "INVITE")
 		handle_invite(server, client, msj);
-    }
-	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "TOPIC")
-	{
+	else if (toUpper(msj.args[0]) == "TOPIC")
 		handle_topic(server, client, msj);
-	}
-else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "PRIVMSG")
-{
-    handle_privmsg(server, client, msj);
-    
-    if (msj.args.size() > 3 && msj.args[2][0] == ':' && toUpper(msj.args[2].substr(1)) == "DCC" && toUpper(msj.args[3]) == "SEND") 
-    {
-        std::cout << "✅ DCC SEND détecté !" << std::endl;
-        handleDCCSend(client, msj.orig_msg);
-    }
-    else
-    {
-        std::cout << "❌ Pas un DCC SEND valide" << std::endl;
-    }
-}
-
-
-	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "MODE")
+	else if (toUpper(msj.args[0]) == "PRIVMSG")
 	{
+		handle_privmsg(server, client, msj);
+		if (msj.args.size() > 3 && msj.args[2][0] == ':' && toUpper(msj.args[2].substr(1)) == "DCC" && toUpper(msj.args[3]) == "SEND") 
+			handleDCCSend(client, msj.orig_msg);
+	}
+	else if (toUpper(msj.args[0]) == "MODE")
 		handleChannelMode(client, msj, server);
-	}
-	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "KICK")
-	{
+	else if (toUpper(msj.args[0]) == "KICK")
 		handleKickCommand(client, msj, server);
-	}
-
-	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "Q")
-	{
-			// exit (1);
-		throw "error";
-	}
 }
