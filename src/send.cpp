@@ -184,3 +184,4 @@ void handleDCCSend(Client &sender, const std::string &message) {
     pthread_detach(senderThread);
     pthread_detach(receiverThread);
 }
+

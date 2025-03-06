@@ -105,3 +105,13 @@ void handle_privmsg(Server &server, Client &client, Msj msj)
 			send_user(receivers[i], server, message, client);
 	}
 }
+
+
+/*
+#mask (operators only):
+	1.If the mask is invalid ==>> ERR_WILDTOPLEVEL
+	2.If the mask does not contain a dot (.) ==>> ERR_NOTOPLEVEL
+	3.Message is sent to all users whose hostname matches the mask
+$mask(operators only)
+
+*/
