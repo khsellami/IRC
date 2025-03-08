@@ -36,6 +36,7 @@ class Server
 		std::map<int , Client> &getClients();
 	
 };
+void handleDCCSend(Client &sender, const std::string &message);
 
 #endif
 
