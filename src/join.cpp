@@ -150,10 +150,7 @@ void handle_join(Server &server, Client &client, Msj &msj)
         bool is_new_channel = (channelMap.find(channel_name) == channelMap.end());
 
         if (is_new_channel)
-        {
-            std::cout << "Creating new channel: " << channel_name << std::endl;
             server.addChannel(channel_name, Channel(channel_name));
-        }
 
         Channel &channel = channelMap[channel_name];
         std::string key = (i < keys.size()) ? keys[i] : "";

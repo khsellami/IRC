@@ -201,7 +201,7 @@ void KillNicknameCollisions(Client& client, std::map<int , Client>& clients)
     }
 }
 
-void handle_authentification(Client &client, Msj msj, Server& server)
+int handle_authentification(Client &client, Msj msj, Server& server)
 {
     // Already registred
     msj.args[0] = toUpper(msj.args[0]);
@@ -211,10 +211,10 @@ void handle_authentification(Client &client, Msj msj, Server& server)
         if (msj.args[0] == "PASS" || msj.args[0] == "USER")
         {
             client.sendMessage(ERR_ALREADYREGISTRED(client.getNickName()));
-            return ;
+            return 1;
         }
         else if (msj.args[0] != "NICK")
-            return ;
+            return 0;
     }
     if (msj.args[0] == "NICK" && client.is_NICK && client.is_PASS)
     {
@@ -223,21 +223,21 @@ void handle_authentification(Client &client, Msj msj, Server& server)
     /****** trying other command before registering *************************/
     if (client.getIs_auth() == false && msj.args[0] != "PASS" && msj.args[0] != "NICK" && msj.args[0] != "USER")
     {
-            client.sendMessage(ERR_NOTREGISTERED);
-            return ;
+            client.sendMessage(ERR_NOTREGISTERED(client.getNickName()));
+            return 1;
     }
     //
     
     if (!client.is_PASS && msj.args[0] != "PASS")
     {
-        client.messageToSend = "You must enter `PASS <password>` first\n";
-        client.sendMessage(client.messageToSend);
-        return ;
+        std::string message = "451 " + client.getNickName() + " :You have not registered - PASS required first\r\n";
+        client.sendMessage(message);
+        return 1;
     }
     if (!(client.getIs_auth()) && msj.args[0] == "PASS")
     {
         check_Password(client, server.getPassword(), msj);
-        return ;
+        return 1;
     }
     if (!(client.getIs_auth()) && client.is_PASS)
     {
@@ -251,4 +251,5 @@ void handle_authentification(Client &client, Msj msj, Server& server)
 
         client.sendMessage(RPL_WELCOME(client.getNickName(), "Welcome to the `SERVER 9DIIM`"));
     }
+    return 1;
 }

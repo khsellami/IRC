@@ -6,7 +6,7 @@
 #include "Msj.hpp"
 #include "Reply.hpp"
 
-void handle_authentification(Client &client, Msj msj, Server& server);
+int handle_authentification(Client &client, Msj msj, Server& server);
 void handleChannelMode(Client &client, Msj msj, Server &server);
 void parse_message(const std::string &msg1, Client &client, Server &server);
 

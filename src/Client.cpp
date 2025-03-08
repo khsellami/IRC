@@ -96,11 +96,10 @@ std::string Client::getName(){
 
 void Client::sendMessage(const std::string &message)
 {
-    std::string formattedMessage = message + "\r\n"; // Format IRC
-    if (write(fd, formattedMessage.c_str(), formattedMessage.length()) == -1)
-    {
-        std::cerr << "Error sending message to client " << fd << std::endl;
-    }
+	if (send(fd, message.c_str(), message.size(), 0) < 0)
+	{
+		std::cerr << "Error sending message to client " << fd << std::endl;
+	}
 }
 std::string Client::getPrefix()
 {
