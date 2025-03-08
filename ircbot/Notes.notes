@@ -61,10 +61,8 @@ struct socket {
   }
 OS uses this metadata to route packets correctly.
 
-Bot use cases ideas:
-1. !quote
-2. !weather
-3. !help
-4. !time
-5. !whoami
-6. !statistics
+Replies should be modified:
+in Channel::invite()
+invite.cpp still have some replies to handle
+
+
