@@ -72,24 +72,38 @@ void send_channel(std::string recv, Server &server, Client &client, std::string 
 		client.sendMessage(ERR_CANNOTSENDTOCHAN(channel_name));
 		return ;
 	}
+	if (message.find("!") != std::string::npos)
+	{
+		if (server.getClientByName("bot") != NULL)
+		{
+			server.getClientByName("bot")->sendMessage(message);
+		}
+		return ;
+	}
 	//broadcast message
 	broadcastMessage(client,ch, message);
 
 }
 
 //****Send User***********************************//
-void send_user(std::string recv, Server &server, std::string message)
+void send_user(std::string recv, Client &client, Server &server, std::string message)
 {
 	Client *c = server.getClientByName(recv);
 	//if the client exist in clients inside srever send it a message[recv]
 	//else reply
 	if (c)//client exist
 	{
-		c->sendMessage(message);
+		if (message.find("\001DCC") != std::string::npos) {
+			// Call your DCC handler function
+			handle_dcc_message(message, client, *c, server);
+			return; // Important to return after handling
+		}
+		else
+			c->sendMessage(message);
 	}
 	else
 	{
-		c->sendMessage(ERR_NOSUCHNICK(recv));
+		client.sendMessage(ERR_NOSUCHNICK(recv));
 	}
 
 
@@ -114,6 +128,19 @@ std::string extract_msg(Msj msj)
 }
 //privmsg target Message
 //target privmsg Message
+bool handle_dcc_message(std::string message, Client &sender, Client &receiver, Server &server)
+{
+	(void)server;
+    // Check if this is a DCC message (CTCP format with \001DCC)
+    if (message.find("\001DCC") == 0 && message.find("\001", 1) != std::string::npos) {
+        // This is a DCC message - just relay it to the target client
+        std::string fullMessage = ":" + sender.getNickName() + "!" + sender.getHostname() + " PRIVMSG " + receiver.getNickName() + " :" + message + "\n";
+        receiver.sendMessage(fullMessage);
+        return true;
+    }
+    return false;
+}
+
 void handle_privmsg(Server &server, Client &client, Msj msj)
 {
 	//DEBUG
@@ -146,7 +173,6 @@ void handle_privmsg(Server &server, Client &client, Msj msj)
 	{
 		client.sendMessage(ERR_TOOMANYTARGETS(std::string("user1,user2,.......")));
     	return;
-
 	}
 	//Add case : number receivers depasse maximum target allowed ==>> ERR_TOOMANYTARGETS
 	//****Extract Message***********************************//
@@ -175,7 +201,7 @@ void handle_privmsg(Server &server, Client &client, Msj msj)
 		}
 		else
 		{
-			send_user(receivers[i], server, message);
+			send_user(receivers[i],client, server, message);
 			/*
 			send_user() pseudo-code:
 				1.check if the nick name of user exist in the server ==>> ERR_NOSUCHNICK

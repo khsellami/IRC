@@ -6,7 +6,7 @@
 /*   By: hmraizik <hmraizik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 11:50:06 by hmraizik          #+#    #+#             */
-/*   Updated: 2025/02/28 18:28:30 by hmraizik         ###   ########.fr       */
+/*   Updated: 2025/03/03 19:55:05 by hmraizik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,8 +210,7 @@ void handle_authentification(Client &client, Msj msj, Server& server)
     {
         if (msj.args[0] == "PASS" || msj.args[0] == "USER")
         {
-            client.messageToSend = "462 :You may not reregister\n";
-            client.sendMessage(client.messageToSend);
+            client.sendMessage(ERR_ALREADYREGISTRED(client.getNickName()));
             return ;
         }
         else if (msj.args[0] != "NICK")
@@ -224,8 +223,7 @@ void handle_authentification(Client &client, Msj msj, Server& server)
     /****** trying other command before registering *************************/
     if (client.getIs_auth() == false && msj.args[0] != "PASS" && msj.args[0] != "NICK" && msj.args[0] != "USER")
     {
-            client.messageToSend = "451 :You have not registered\n";
-            client.sendMessage(client.messageToSend);
+            client.sendMessage(ERR_NOTREGISTERED);
             return ;
     }
     //
@@ -251,7 +249,6 @@ void handle_authentification(Client &client, Msj msj, Server& server)
         client.setIs_auth(true);
         KillNicknameCollisions(client, server.getClients());
 
-        client.messageToSend = "Welcome, You have registred succesfully!\n";
-        client.sendMessage(client.messageToSend);
+        client.sendMessage(RPL_WELCOME(client.getNickName(), "Welcome to the `SERVER 9DIIM`"));
     }
 }

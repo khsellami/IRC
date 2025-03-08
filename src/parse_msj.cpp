@@ -1,6 +1,7 @@
 
 #include "../include/header.hpp"
 
+
 void handleKickCommand(Client &client, Msj msj, Server &server)
 {
 	if (msj.args.size() < 3)
@@ -99,10 +100,5 @@ void parse_message(const std::string &msg1, Client &client, Server &server)
 	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "KICK")
 	{
 		handleKickCommand(client, msj, server);
-	}
-	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "Q")
-	{
-		// exit (1);
-		throw "error";
 	}
 }

@@ -8,7 +8,6 @@
 // }
 int main(int ac, char** av)
 {
-
 	// atexit(ff);
 	if(ac != 3){return 1;}
 	Server server(std::atoi(av[1]), std::string(av[2]));

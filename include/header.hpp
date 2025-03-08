@@ -22,5 +22,6 @@ void handle_invite(Server &server, Client &client, Msj &msj);
 void broadcastMessage(Client &client, Channel &channel, std::string message);
 std::string geting_message(const std::string &msg);
 std::string toUpper(const std::string &str);
+bool handle_dcc_message(std::string message, Client &sender, Client &receiver, Server &server);
 
 #endif

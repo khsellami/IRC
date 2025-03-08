@@ -100,7 +100,7 @@ void Server::connect_client(Server &server)
 			Client newClient;
 			newClient.setSocket(clientSocket);
 			newClient.setHost(inet_ntoa(clientAddress.sin_addr));
-
+			newClient.setClientIp(clientSocket);
 			clients[clientSocket] = newClient;
 
 			fds.push_back(new_client);
@@ -148,8 +148,6 @@ void Server::connect_client(Server &server)
 std::map<std::string, Channel>& Server::getChannels() {
     return channels;
 }
-
-
 
 void Server::addChannel(std::string name, Channel channel)
 {

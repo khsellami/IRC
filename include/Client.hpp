@@ -13,6 +13,7 @@ class Client
 		std::string nickname;
 		std::string username;
 		std::string hostname;
+		std::string _clientIp;
 		std::string servername;
 		std::string realname;
 		bool 		is_auth;
@@ -39,6 +40,7 @@ class Client
 		void setServername(std::string Servername);
 		void setRealname(std::string Realname);
 		void setIs_auth(bool value);
+		void setClientIp(int fd);
 		//getters
 		std::string getHostname();
 		std::string getRealname();
