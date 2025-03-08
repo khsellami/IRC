@@ -1,6 +1,7 @@
 
 #include "../include/header.hpp"
 
+
 void handleKickCommand(Client &client, Msj msj, Server &server)
 {
 	if (msj.args.size() < 3)
@@ -84,8 +85,6 @@ void parse_message(const std::string &msg1, Client &client, Server &server)
 	else if (toUpper(msj.args[0]) == "PRIVMSG")
 	{
 		handle_privmsg(server, client, msj);
-		if (msj.args.size() > 3 && msj.args[2][0] == ':' && toUpper(msj.args[2].substr(1)) == "DCC" && toUpper(msj.args[3]) == "SEND") 
-			handleDCCSend(client, msj.orig_msg);
 	}
 	else if (toUpper(msj.args[0]) == "MODE")
 		handleChannelMode(client, msj, server);

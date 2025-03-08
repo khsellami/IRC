@@ -40,6 +40,8 @@ void send_channel(std::string recv, Server &server, Client &client, std::string 
 		client.sendMessage(ERR_CANNOTSENDTOCHAN(channel_name));
 		return ;
 	}
+
+
 	std::string rpl = RPL_PRIVMSG(client.getNickName(), channel_name, message);
 	broadcastMessage(client,ch, rpl);
 
@@ -51,11 +53,19 @@ void send_user(std::string recv, Server &server, std::string message, Client &cl
 	Client *c = server.getClientByName(recv);
 	if (c)
 	{
-		std::string rpl = RPL_PRIVMSG(client.getNickName(), recv, message);
-		c->sendMessage(rpl);
+		if (message.find("\001DCC") != std::string::npos) {
+			// Call your DCC handler function
+			handle_dcc_message(message, client, *c, server);
+			return; // Important to return after handling
+		}
+		else
+			c->sendMessage(message);
 	}
 	else
+	{
 		client.sendMessage(ERR_NOSUCHNICK(recv));
+	}
+
 }
 
 //****Extract Message***********************************//
@@ -67,6 +77,20 @@ std::string extract_msg(Msj msj)
 	else if (msj.args.size() == 3)
 		message = msj.args[2];
 	return message;
+}
+//privmsg target Message
+//target privmsg Message
+bool handle_dcc_message(std::string message, Client &sender, Client &receiver, Server &server)
+{
+	(void)server;
+    // Check if this is a DCC message (CTCP format with \001DCC)
+    if (message.find("\001DCC") == 0 && message.find("\001", 1) != std::string::npos) {
+        // This is a DCC message - just relay it to the target client
+        std::string fullMessage = ":" + sender.getNickName() + "!" + sender.getHostname() + " PRIVMSG " + receiver.getNickName() + " :" + message + "\n";
+        receiver.sendMessage(fullMessage);
+        return true;
+    }
+    return false;
 }
 
 void handle_privmsg(Server &server, Client &client, Msj msj)
@@ -105,13 +129,3 @@ void handle_privmsg(Server &server, Client &client, Msj msj)
 			send_user(receivers[i], server, message, client);
 	}
 }
-
-
-/*
-#mask (operators only):
-	1.If the mask is invalid ==>> ERR_WILDTOPLEVEL
-	2.If the mask does not contain a dot (.) ==>> ERR_NOTOPLEVEL
-	3.Message is sent to all users whose hostname matches the mask
-$mask(operators only)
-
-*/

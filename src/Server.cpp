@@ -138,6 +138,7 @@ void Server::connect_client(Server &server)
 				//Create objet client && add it to clients
 				Client client;
 				client.setSocket(clientSocket);
+				client.setClientIp(clientSocket);
 				client.setHost(inet_ntoa(clientAddress.sin_addr));
 				clients[clientSocket] = client;
 				std::cout << "New client connected: " << inet_ntoa(clientAddress.sin_addr) << '\n';
