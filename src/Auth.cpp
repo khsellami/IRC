@@ -6,7 +6,7 @@
 /*   By: hmraizik <hmraizik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 11:50:06 by hmraizik          #+#    #+#             */
-/*   Updated: 2025/03/03 19:55:05 by hmraizik         ###   ########.fr       */
+/*   Updated: 2025/03/09 21:30:53 by hmraizik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ void  check_Password(Client& client, std::string password, Msj command){
 
 bool check_Dupplicated(Msj command, std::map<int, Client> clients){
     std::map<int, Client>::iterator i = clients.begin();
+    
 
     while (i != clients.end())
     {
