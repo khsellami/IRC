@@ -1,6 +1,6 @@
 #include "bot.hpp"
 
-// make some quotes
+
 std::string quotes[20] = {
     "The only way to do great work is to love what you do. - Steve Jobs",
     "In the middle of every difficulty lies opportunity. - Albert Einstein",
@@ -29,12 +29,20 @@ int getRandom20()
     return rand() % 20;
 }
 
+std::string trim(const std::string &str)
+{
+	size_t first = str.find_first_not_of(" \t\r\0");
+	if (first == std::string::npos) return "";
+	size_t last = str.find_last_not_of(" \t\n");
+	return str.substr(first, last - first + 1);
+}
+
 void handle_message(std::string message, int fd)
 {
-    std::string target = message.substr(0, message.find(" "));
-    std::cout << "target: [" << target << "]" << std::endl;
-    std::cout << "message: [" << message << "]" << std::endl;  
-    if (message.find("!HELP") != std::string::npos)
+    std::string target = message.substr(0, message.find(" ")); 
+    std::string command = trim(message.substr(message.find(" ")));
+    std::cout << "[" << command << "]" << std::endl;
+    if (command == "!HELP")
     {
         std::string help_message = "PRIVMSG " + target + " :Hello, I am the bot. I can help you with the following commands:\n";
         help_message += "!HELP: Show this help message\n";
@@ -42,9 +50,9 @@ void handle_message(std::string message, int fd)
         help_message += "!QUOTE: Show a random quote\n";
         send(fd, help_message.c_str(), help_message.size() + 10, 0);
     }
-    else if (message.find("!TIME") != std::string::npos)
+    else if (command == "!TIME")
     {
-        time_t now = time(0);
+        time_t now = time(0); 
         tm *local_time = localtime(&now);
         std::string time_message = "PRIVMSG " + target + " :The current time is " + std::to_string(local_time->tm_hour) + ":" + std::to_string(local_time->tm_min) + ":" + std::to_string(local_time->tm_sec) + "\r\n";
         if (send(fd, time_message.c_str(), time_message.size(), 0) < 0)
@@ -52,7 +60,7 @@ void handle_message(std::string message, int fd)
             std::cerr << "send() failed" << std::endl;
         }
     }
-    else if (message.find("!QUOTE") != std::string::npos)
+    else if (command == "!QUOTE")
     {
         int random_index = getRandom20();
         std::string quote_message = "PRIVMSG " + target + " :" + quotes[random_index] + "\r\n";
@@ -61,7 +69,6 @@ void handle_message(std::string message, int fd)
             std::cerr << "send() failed" << std::endl;
         }
     }
-
 }
 
 //do not forget to check and marque the nick name of the bot as NICKINUSE

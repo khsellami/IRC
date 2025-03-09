@@ -68,7 +68,9 @@ void parse_bot_command(Msj &msj, Client &client, Server &server)
 	Client *bot = server.getClientByName("bot");
 	if (!bot)
 	{
-		std::cerr << "bot not found" << std::endl;
+		std::string message = "bot Not found";
+		std::cerr << message << std::endl;
+		send(client.getSocket(), message.c_str(), message.size(), 0);
 		return ;
 	}
 	if (msj.args[0].find("!HELP") != std::string::npos || msj.args[0].find("!TIME") != std::string::npos || msj.args[0].find("!QUOTE") != std::string::npos)
