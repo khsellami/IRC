@@ -24,11 +24,8 @@ void handle_invite(Server &server, Client &client, Msj &msj)
         client.sendMessage(ERR_NEEDMOREPARAMS(client.getName()));
         return;
     }
-
-    std::string target_nickname = msj.args[1]; // The client to invite
+    std::string target_nickname = msj.args[1];
     std::string channel_name =  (msj.args[2][0] == '#' || msj.args[2][0] == '&') ? msj.args[2].substr(1) : msj.args[2];
-
-    // Verify if the target user exists
     Client *target_client = server.getClientByName(target_nickname);
     if (!target_client)
     {
@@ -39,10 +36,8 @@ void handle_invite(Server &server, Client &client, Msj &msj)
     {
         client.sendMessage(RPL_INVITING(client.getName(), target_nickname, channel_name));
         target_client->sendMessage(":" + client.getNickName() + " INVITE " + target_nickname + " " + channel_name);
-        std::cout << "[INVITE] " << client.getNickName() << " invited " << target_nickname << " to " << channel_name << " (channel does not exist yet)." << std::endl;
         return;
     }
-
     Channel &channel = server.getChannels()[channel_name];
     if (!channel.isMember(client))
     {
@@ -62,5 +57,4 @@ void handle_invite(Server &server, Client &client, Msj &msj)
     channel.invite(*target_client);
     client.sendMessage(RPL_INVITING(client.getName(), target_nickname, channel_name)); // RPL_INVITING
     target_client->sendMessage(":" + client.getNickName() + " INVITE " + target_nickname + " " + channel_name);
-    std::cout << "[INVITE] " << client.getNickName() << " invited " << target_nickname << " to " << channel_name << std::endl;
 }
