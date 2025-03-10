@@ -11,18 +11,19 @@
 #include "Channel.hpp"
 #include "Msj.hpp"
 #include "Reply.hpp"
+#include <csignal>
 
 class Server
 {
 	private:
-		int 		port;
-		int			serverSocket;
-		std::string password;
-		std::vector<struct pollfd > fds;
-		std::map<int , Client> clients;
-		std::map<std::string, Channel> channels;
-
+	std::vector<struct pollfd > fds;
+	std::map<int , Client> clients;
+	std::map<std::string, Channel> channels;
+	
+	int 		port;
+	std::string password;
 	public:
+	int			serverSocket;
 		Server();
 		Channel* getChannel(const std::string& channelName);
 		std::string getPassword();
@@ -34,6 +35,9 @@ class Server
 		void addChannel(std::string name, Channel channel);
 		Client* getClientByName(const std::string &name);
 		std::map<int , Client> &getClients();
+		void	close_allfds();
+		static bool signal_received_flag;
+		static void SignalHandler(int signum);
 	
 };
 void handleDCCSend(Client &sender, const std::string &message);
