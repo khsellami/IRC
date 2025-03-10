@@ -7,13 +7,26 @@
 
 #include "../include/Server.hpp"
 #include "../include/Client.hpp"
+void Client::setClientIp(int fd)
+{
+	struct sockaddr_in client_addr;
+    socklen_t client_len = sizeof(client_addr);
+    char clientIp[INET_ADDRSTRLEN];
 
+    if (getpeername(fd, (struct sockaddr *)&client_addr, &client_len) == -1)
+        throw std::runtime_error("getpeername failed");
+    if (inet_ntop(AF_INET, &client_addr.sin_addr, clientIp, sizeof(clientIp)) == NULL)
+        throw std::runtime_error("inet_ntop failed");
+    _clientIp = std::string(clientIp);
+	std::cout << "Client IP: " << _clientIp << std::endl;
+}
 Client::Client()
 {
 	is_auth = false;
 	is_PASS = false;
 	is_NICK = false;
 	is_USER = false;
+	has_received = false;
 	Mode_in_channel = 0;
 }
 
@@ -81,16 +94,45 @@ std::string Client::getName(){
 	return this->username;
 }
 
-bool Client::isOp(){return is_op;}
 void Client::sendMessage(const std::string &message)
 {
-    std::string formattedMessage = message + "\r\n"; // Format IRC
-    if (write(fd, formattedMessage.c_str(), formattedMessage.length()) == -1)
-    {
-        std::cerr << "Error sending message to client " << fd << std::endl;
-    }
+	if (send(fd, message.c_str(), message.size(), 0) < 0)
+	{
+		std::cerr << "Error sending message to client " << fd << std::endl;
+	}
 }
 std::string Client::getPrefix()
 {
-    return ":" + nickname + "!user@host";
+    return (":" + nickname + "!" + username + "@" + _clientIp);
+}
+
+// Client::Client(int fd){
+//     struct sockaddr_in client_addr;
+//     socklen_t client_len = sizeof(client_addr);
+//     char clientIp[INET_ADDRSTRLEN];
+
+//     if (getpeername(fd, (struct sockaddr *)&client_addr, &client_len) == -1)
+//         throw std::runtime_error("getpeername failed");
+//     if (inet_ntop(AF_INET, &client_addr.sin_addr, clientIp, sizeof(clientIp)) == NULL)
+//         throw std::runtime_error("inet_ntop failed");
+//     _clientIp = std::string(clientIp);
+// }
+
+std::set<std::string> Client::getJoinedChannels()
+{
+	return joinedChannels;
+}
+
+void Client::appendToBuffer(const std::string& data)
+{ 
+	messageBuffer += data;
+}
+
+std::string Client::getBuffer() const { 
+	return messageBuffer; 
+}
+
+void Client::clearBuffer()
+{ 
+	messageBuffer.clear();
 }

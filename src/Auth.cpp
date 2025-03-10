@@ -3,17 +3,36 @@
 /*                                                        :::      ::::::::   */
 /*   Auth.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ksellami <ksellami@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hmraizik <hmraizik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 11:50:06 by hmraizik          #+#    #+#             */
-/*   Updated: 2025/02/27 19:08:28 by ksellami         ###   ########.fr       */
+/*   Updated: 2025/03/09 21:30:53 by hmraizik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Client.hpp"
 #include "../include/Server.hpp"
+#include "../include/header.hpp"
 #include <sstream>
 
+
+
+void broadcastMessageForNick(Client &client, Channel &channel, std::string message)
+{
+	//Extract the members of the channel
+	std::vector <Client> toSend = channel.getMembers();
+	for (size_t i=0 ; i < channel.getMembers().size(); i++)
+	{
+		//skip the client that send the message to the channel
+		if (channel.getMembers()[i].getSocket() == client.getSocket() || channel.getMembers()[i].has_received == true)
+			continue;
+        else if (channel.getMembers()[i].has_received == false)
+        {
+		    channel.getMembers()[i].sendMessage(message);
+            channel.getMembers()[i].has_received = true;
+        }
+	}
+}
 
 
 void  check_Password(Client& client, std::string password, Msj command){
@@ -29,6 +48,7 @@ void  check_Password(Client& client, std::string password, Msj command){
 
 bool check_Dupplicated(Msj command, std::map<int, Client> clients){
     std::map<int, Client>::iterator i = clients.begin();
+    
 
     while (i != clients.end())
     {
@@ -45,7 +65,7 @@ bool NickNameValide(Msj command)
 {
     if (command.args[1].empty())
         return false;
-    
+
     if (!isalpha(command.args[1][0]))
         return false;
     
@@ -70,19 +90,23 @@ void check_Names(Client& client, Msj command, std::map<int , Client>& clients){
           if (command.args.size() < 2 || command.args[1].empty())
         {
             client.sendMessage(ERR_NONICKNAMEGIVEN(command.args[1]));
+            return ;
         }
         if (!NickNameValide(command))
         {
             client.sendMessage(ERR_ERRONEUSNICKNAME(command.args[1]));
+            return ;
         }
         if (check_Dupplicated(command, clients))
         {
             client.sendMessage(ERR_NICKNAMEINUSE(command.args[1]));
+            return ;
         }
         else
         {
             client.setNickName(command.args[1]);
             client.is_NICK = true;
+            return ;
         }
     }
     if (command.args[0] == "USER")
@@ -118,21 +142,51 @@ void check_Names(Client& client, Msj command, std::map<int , Client>& clients){
     }
 }
 
+void reset_hasReceivedBool(Server& server, Client& client){
+    // std::map<std::string, Channel> channels = server.getChannels();
+    std::map<std::string, Channel>::iterator it = server.getChannels().begin();
+
+    while (it != server.getChannels().end()){
+        if (it->second.isMember(client))
+        {
+            // std::vector <Client> clients = it->second.getMembers();
+            for (size_t i = 0; i < it->second.getMembers().size(); i++)
+            {
+                it->second.getMembers()[i].has_received = false;
+            }
+        }
+        ++it;
+    }
+}
+void prodcastNickUpdated(Server &server, Client& client, std::string oldNick)
+{
+    std::map<std::string, Channel>::iterator it = server.getChannels().begin();
+    std::string message = oldNick + " changed his nickname to " + client.getNickName();
+    while (it != server.getChannels().end())
+    {
+        std::cout << it->second.isMember(client) << std::endl;
+        if (it->second.isMember(client))
+        {
+            broadcastMessageForNick(client, it->second, message);
+        }
+        ++it;
+    }
+}
+
 void UpdateNickname(Client &client, Server &server, Msj msj, std::map<int , Client>& clients){
-    (void)server;
     if (!NickNameValide(msj))
     {
-        client.messageToSend = "432 " + client.getNickName() + " :Erroneus nickname\n";
-        client.sendMessage(client.messageToSend);
+        client.sendMessage(ERR_ERRONEUSNICKNAME(msj.args[1]));
+        return ;
     }
     if (check_Dupplicated(msj, clients))
     {
-        client.messageToSend = "433 " + client.getNickName() + " :Nickname is already in use\n";
-        client.sendMessage(client.messageToSend);
+        client.sendMessage(ERR_NICKNAMEINUSE(msj.args[1]));
+        return ;
     }
     std::string OldNickname = client.getNickName();
-    client.setNickName(msj.args[0]);
-    client.sendMessage(std::string(" // Broadcast to channels: :<oldnickname> NICK :<newnickname>\n"));
+    client.setNickName(msj.args[1]);
+    prodcastNickUpdated(server, client, OldNickname);
 }
 
 void KillNicknameCollisions(Client& client, std::map<int , Client>& clients)
@@ -148,56 +202,55 @@ void KillNicknameCollisions(Client& client, std::map<int , Client>& clients)
     }
 }
 
-void handle_authentification(Client &client, std::string password, Msj msj, std::map<int , Client>& clients, Server& server)
+int handle_authentification(Client &client, Msj msj, Server& server)
 {
     // Already registred
+    msj.args[0] = toUpper(msj.args[0]);
+
     if (client.getIs_auth() == true)
     {
         if (msj.args[0] == "PASS" || msj.args[0] == "USER")
         {
-            client.messageToSend = "462 :You may not reregister\n";
-            client.sendMessage(client.messageToSend);
-            return ;
+            client.sendMessage(ERR_ALREADYREGISTRED(client.getNickName()));
+            return 1;
         }
         else if (msj.args[0] != "NICK")
-            return ;
+            return 0;
     }
     if (msj.args[0] == "NICK" && client.is_NICK && client.is_PASS)
     {
-        UpdateNickname(client, server, msj, clients);
+        UpdateNickname(client, server, msj, server.getClients());
     }
     /****** trying other command before registering *************************/
     if (client.getIs_auth() == false && msj.args[0] != "PASS" && msj.args[0] != "NICK" && msj.args[0] != "USER")
     {
-            client.messageToSend = "451 :You have not registered\n";
-            client.sendMessage(client.messageToSend);
-            return ;
+            client.sendMessage(ERR_NOTREGISTERED(client.getNickName()));
+            return 1;
     }
     //
     
     if (!client.is_PASS && msj.args[0] != "PASS")
     {
-        client.messageToSend = "You must enter `PASS <password>` first\n";
-        client.sendMessage(client.messageToSend);
-        return ;
+        std::string message = "451 " + client.getNickName() + " :You have not registered - PASS required first\r\n";
+        client.sendMessage(message);
+        return 1;
     }
     if (!(client.getIs_auth()) && msj.args[0] == "PASS")
     {
-        check_Password(client, password, msj);
-        return ;
+        check_Password(client, server.getPassword(), msj);
+        return 1;
     }
     if (!(client.getIs_auth()) && client.is_PASS)
     {
-        check_Names(client, msj, clients);
+        check_Names(client, msj, server.getClients());
     }
     // verify if auth complited
     if (!(client.getIs_auth()) && client.is_PASS && client.is_NICK && client.is_USER)
     {
         client.setIs_auth(true);
-        KillNicknameCollisions(client, clients);
+        KillNicknameCollisions(client, server.getClients());
 
-        client.messageToSend = "Welcome, You have registred succesfully!\n";
-        client.sendMessage(client.messageToSend);
+        client.sendMessage(RPL_WELCOME(client.getNickName(), "Welcome to the `SERVER 9DIIM`"));
     }
-    // std::cout << "Client hostname:"<< client.getHostname() << '\n';
+    return 1;
 }

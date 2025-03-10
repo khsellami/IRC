@@ -4,30 +4,12 @@
 
 void handle_topic(Server &server, Client &client, Msj msj)
 {
-	//DEBUG////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// std::cout << "*****************************************************************\n\n\n";
-	// std::cout << "CHannels\n\n";
-	// for(std::map<std::string, Channel>::iterator it = server.getChannels().begin(); it != server.getChannels().end() ;++it)
-	// {
-	// 	std::cout << it->first << '\n';
-	// }
-	//****just for debug***********************************//
-	// std::vector<std::string>::iterator it = msj.args.begin();
-	// while (it != msj.args.end())
-	// {
-	// 	std::cout << "[" << *it << "] ";
-	// 	it++;
-	// }
-	// std::cout << '\n';
-	// std::cout << "*********Inside topic Command*******************\n";
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	//Take the list of the channels
 	//****Few arguments***********************************//
 	std::map<std::string, Channel> channels = server.getChannels();
 	if (msj.args.size() < 2)
 	{
-		client.sendMessage(ERR_NEEDMOREPARAMS(std::string("TOPIC")));
+		client.sendMessage(ERR_NEEDMOREPARAMS(msj.args[0]));
 		return;
 	}
 
@@ -86,7 +68,7 @@ void handle_topic(Server &server, Client &client, Msj msj)
 			return ;
 		}
 		//No permissions
-		if (!client.isOp() && !ch.getT())
+		if (!ch.isOperator(client) && ch.getTopicRestriction())
 		{
 			client.sendMessage(ERR_CHANOPRIVSNEEDED(channel_name));
 			return ;

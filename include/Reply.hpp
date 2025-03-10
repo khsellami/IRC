@@ -22,7 +22,7 @@
 #define ERR_NONICKNAMEGIVEN(target)           			PREFIX "431 " + target + " :No nickname given" POSTFIX 
 #define ERR_PASSWDMISMATCH(target)						PREFIX "464 " + target + ":Password incorrect" POSTFIX 
 #define ERR_ALREADYREGISTRED(target)					PREFIX "462 " + target + ":You may not reregister" POSTFIX 
-#define ERR_NOTREGISTERED								"Error: You are not registered."
+#define ERR_NOTREGISTERED(target)								PREFIX "451 " + target + ":Error: You are not registered." POSTFIX
 #define ERR_CHANNELISFULL(client, channel)				PREFIX " 471 " + client + " " + channel + " :Cannot join channel (+l)" POSTFIX
 #define ERR_INVITEONLYCHAN(client, channel)				PREFIX " 473 " + client + " " + channel + " :Cannot join channel (+i)" POSTFIX
 #define ERR_NEEDMODEPARM(channelname, mode)				(std::string(": 696 ") + channelname + " * You must specify a parameter for the key mode. " + mode + POSTFIX)
@@ -46,8 +46,14 @@
 #define RPL_CHANGEMODE(hostname, channelname, mode)		(":" + hostname + " MODE " + channelname + " " + mode + POSTFIX)
 #define RPL_UMODEIS(hostname, channelname, mode, user)	":" + hostname + " MODE " + channelname + " " + mode + " " + user + POSTFIX
 
-//////////ADDED:
-#define ERR_CANNOTSENDTOCHAN(channel) "404 " + channel + " :Cannot send to channel"
-#define ERR_TOOMANYTARGETS(target) "407 " + target + " :Too many recipients"
+//////////ADDED:////////////////////////////////////////
+//PRIVMSG
+#define ERR_CANNOTSENDTOCHAN(channel)  PREFIX "404 " + channel + " :Cannot send to channel" + POSTFIX 
+#define ERR_TOOMANYTARGETS()			PREFIX "407 :Too many targets" POSTFIX 
+///////////
+///////ana li zadt hado 3la hsab join o rah hazithom mn file lakhor dyal reply
+#define ERR_BANNEDFROMCHAN(client, channel)  PREFIX "474 " + client + " " + channel + " :Cannot join channel (+b)" POSTFIX
+#define ERR_BADCHANNELKEY(client, channel)   PREFIX "475 " + client + " " + channel + " :Cannot join channel (+k)" POSTFIX
+#define ERR_USERONCHANNEL(client, user, channel) PREFIX "443 " + client + " " + user + " " + channel + " :is already on channel" POSTFIX
 
 #endif

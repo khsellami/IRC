@@ -2,17 +2,7 @@
 #define CLIENT_HPP
 
 #include <iostream>
-#define PASS_VALIDATED 0
-#define NICK_VALIDATED 1
-#define USER_VALIDATED 2
-#define PASS_NEEDED_NICK_VALIDATED -1
-#define PASS_NEEDED_USER_VALIDATED -2
-#define JUST_PASS_NEEDED_TO_AUTH -3
-
-#define OPERATOR 1
-#define INVITED 2
-#define MEMBER 3
-
+#include <set>
 class Client 
 {
 	private:
@@ -23,23 +13,24 @@ class Client
 		std::string nickname;
 		std::string username;
 		std::string hostname;
+		std::string _clientIp;
 		std::string servername;
 		std::string realname;
-		bool is_auth;
+		bool 		is_auth;
 		//////////INVITE//////////
 		int Mode_in_channel;
-		bool is_op;
+		std::set<std::string> joinedChannels;
+		//
+		std::string messageBuffer;
 	public:
 	//////////AUTHENTIFICATE//////////
 		bool is_PASS;
 		bool is_NICK;
 		bool is_USER;
-		std::string messageToSend;
+		bool has_received;
 		bool operator==(const Client &other) const {
         return this->nickname == other.nickname; // Comparaison par pseudo
     	}
-
-
 		Client();
 		//setters
 		void setSocket(int fd);
@@ -50,6 +41,7 @@ class Client
 		void setServername(std::string Servername);
 		void setRealname(std::string Realname);
 		void setIs_auth(bool value);
+		void setClientIp(int fd);
 		//getters
 		std::string getHostname();
 		std::string getRealname();
@@ -58,20 +50,13 @@ class Client
 		std::string getNickName();
 		bool getIs_auth();
 		std::string getName();
-		bool isOp();
 		void sendMessage(const std::string &message);
-		bool getIs_operator(){
-			if (is_op == true)
-				return true;
-			return false;
-		}
-		void setOperator(bool status){
-			if (status == true)
-				is_op = true;
-			else
-				is_op = false;
-		}
 		std::string getPrefix();
+		std::set<std::string> getJoinedChannels();
+		////////////************ add it to handle buffer ************////////////
+		void appendToBuffer(const std::string& data);
+		std::string getBuffer() const;
+		void clearBuffer();
 };
 
 #endif

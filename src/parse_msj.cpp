@@ -1,15 +1,50 @@
 
 #include "../include/header.hpp"
 
-std::string getCommand(const std::string &msg)
-{
-	return msg.substr(0, msg.find(" "));
-}
 
-std::string getArgument(const std::string &msg)
+void handleKickCommand(Client &client, Msj msj, Server &server)
 {
-	size_t pos = msg.find(" ");
-	return (pos != std::string::npos) ? msg.substr(pos + 1) : "";
+	if (msj.args.size() < 3)
+	{
+		client.sendMessage(ERR_NEEDMOREPARAMS(msj.args[0]));
+		return ;
+	}
+	std::string channel_name = msj.args[1];
+	if (channel_name[0] != '#' && channel_name[0] != '&')
+	{
+		client.sendMessage(ERR_NOSUCHCHANNEL(channel_name));
+		return ;
+	}
+	channel_name =  msj.args[1].substr(1);
+	std::string target = msj.args[2];
+	std::string reason = msj.args.size() > 3 ? geting_message(msj.orig_msg) : "Kicked";
+	// i just check first if the channel exist
+	Channel *channel = server.getChannel(channel_name);
+	if (!channel)
+	{
+		client.sendMessage(ERR_NOSUCHCHANNEL(channel_name));
+		return ;
+	}
+	// just operators can kick members
+	if (!channel->isOperator(client))
+	{
+		client.sendMessage(ERR_CHANOPRIVSNEEDED(channel_name));
+		return ;
+	}
+	Client *targetClient = server.getClientByName(target);
+	if (!targetClient)
+	{
+		client.sendMessage(ERR_NOSUCHNICK(target));
+		return ;
+	}
+	if (!channel->isMember(*targetClient))
+	{
+		client.sendMessage(ERR_USERNOTINCHANNEL(target, channel_name));
+		return ;
+	}
+	channel->removeMember(*targetClient);
+	targetClient->sendMessage(":" + client.getNickName() + " KICK " + channel_name + " " + target + " :" + reason + "\n");
+	broadcastMessage(client, *channel, ":" + client.getNickName() + " KICK " + channel_name + " " + target + " :" + reason + "\n");
 }
 
 std::string toUpper(const std::string &str)
@@ -27,9 +62,34 @@ std::string trim(const std::string &str)
 	return str.substr(first, last - first + 1);
 }
 
-void parse_message(const std::string &msg1, Client &client, const char* password, std::map<int , Client> clients, Server &server, std::map<std::string, Channel> channels)
+void parse_bot_command(Msj &msj, Client &client, Server &server)
 {
-	(void)channels;
+	std::string messageWithNick = client.getNickName() + " " + msj.orig_msg;
+	Client *bot = server.getClientByName("bot");
+	if (!bot)
+	{
+		std::string message = "bot Not found";
+		std::cerr << message << std::endl;
+		send(client.getSocket(), message.c_str(), message.size(), 0);
+		return ;
+	}
+	if (msj.args[0].find("!HELP") != std::string::npos || msj.args[0].find("!TIME") != std::string::npos || msj.args[0].find("!QUOTE") != std::string::npos)
+	{
+		if (send(bot->getSocket(), messageWithNick.c_str(), messageWithNick.size(), 0) < 0)
+		{
+			std::cerr << "send() failed" << std::endl;
+			return ;
+		}
+	}
+	else
+	{
+		client.sendMessage(ERR_UNKNOWNCOMMAND(msj.args[0]));
+		return ;
+	}
+}
+
+void parse_message(const std::string &msg1, Client &client, Server &server)
+{
 	Msj msj;
 	std::string msg = trim(msg1);
 	std::stringstream  ss(msg);
@@ -37,31 +97,29 @@ void parse_message(const std::string &msg1, Client &client, const char* password
 	while (ss >> word)
 		msj.args.push_back(word);
 	msj.orig_msg = msg;
-	handle_authentification(client, std::string(password), msj, clients, server);
+	if (msj.args.empty())
+		return ;
+	if (handle_authentification(client, msj, server))
+		return ;
 	if (client.getIs_auth() == false)
 		return ;
-	if (msj.args.size() > 0 && toUpper(msj.args[0]) == "JOIN")
-	{
+	if (toUpper(msj.args[0]) == "JOIN")
 		handle_join(server, client, msj);
-	}
-	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "INVITE")
-	{
+	else if (toUpper(msj.args[0]) == "INVITE")
 		handle_invite(server, client, msj);
-    }
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////
-	/*
-	To handle 2 cases:
-		privmsg target :message 
-		:message privmsg target
-	*/
-	else if (msj.args.size() > 0 && toUpper(msj.args[0]) == "TOPIC")
-	{
+	else if (toUpper(msj.args[0]) == "TOPIC")
 		handle_topic(server, client, msj);
-	}
-	else if ((msj.args.size() > 0 && toUpper(msj.args[0]) == "PRIVMSG") || (msj.args.size() > 1 && toUpper(msj.args[1]) == "PRIVMSG"))
-	{
+	else if (toUpper(msj.args[0]) == "PRIVMSG")
 		handle_privmsg(server, client, msj);
+	else if (toUpper(msj.args[0]) == "MODE")
+		handleChannelMode(client, msj, server);
+	else if (toUpper(msj.args[0]) == "KICK")
+		handleKickCommand(client, msj, server);
+	else if (msj.args[0].find("!") != std::string::npos)
+		parse_bot_command(msj, client, server);
+	else if (!msj.args[0].empty())
+	{
+		client.sendMessage(ERR_UNKNOWNCOMMAND(msj.args[0]));
+		return ;
 	}
-	//////////////////////////////////////////////////////////////////////////////////////////////////
 }

@@ -1,12 +1,12 @@
 #ifndef Server_HPP
 #define Server_HPP
 
+#include <cstdio>
 #include <poll.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <map>
-#include "Server.hpp"
 #include "Client.hpp"
 #include "Channel.hpp"
 #include "Msj.hpp"
@@ -17,22 +17,26 @@ class Server
 	private:
 		int 		port;
 		int			serverSocket;
-		const char* password;
+		std::string password;
 		std::vector<struct pollfd > fds;
 		std::map<int , Client> clients;
 		std::map<std::string, Channel> channels;
 
 	public:
 		Server();
+		Channel* getChannel(const std::string& channelName);
+		std::string getPassword();
 		void	run();
-		Server(int port, const char* password);
+		Server(int port, std::string password);
 		int getSock() const;
 		void connect_client(Server &server);
 		std::map<std::string, Channel> &getChannels();
 		void addChannel(std::string name, Channel channel);
 		Client* getClientByName(const std::string &name);
+		std::map<int , Client> &getClients();
 	
 };
+void handleDCCSend(Client &sender, const std::string &message);
 
 #endif
 
