@@ -66,6 +66,12 @@ void handleChannelMode(Client &client, Msj msj, Server &server)
                     channel->__setOperator(targetNick, adding);
                 }
                 break;
+            case 'l':
+                if (adding && argIndex < msj.args.size())
+                    channel->setLimit(atoi(msj.args[argIndex++].c_str()));
+                else if (!adding)
+                    channel->removeLimit();
+                break;
             default:
                 client.sendMessage("472 " + client.getNickName() + " " + std::string(1, modes[i]) + " :is unknown mode char\n");
         }

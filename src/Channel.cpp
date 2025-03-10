@@ -5,11 +5,29 @@ Channel::Channel()
     is_hasKey = false;
     topicRestricted = false;
     inviteOnly = false;
+    is_limit = false;
+    limit = 0;
 }
 
 Channel::Channel(std::string name) : name_channel(name) ,inviteOnly(false)
 {
+    is_hasKey = false;
+    topicRestricted = false;
+    inviteOnly = false;
+    is_limit = false;
+    limit = 0;
+}
 
+void Channel::setLimit(size_t newLimit)
+{
+    limit = newLimit;
+    is_limit = true;
+}
+
+void Channel::removeLimit()
+{
+    is_limit = false;
+    limit = 0;
 }
 
 std::string  Channel::getName()
