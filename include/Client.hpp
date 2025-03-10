@@ -13,19 +13,21 @@ class Client
 		std::string nickname;
 		std::string username;
 		std::string hostname;
+		std::string _clientIp;
 		std::string servername;
 		std::string realname;
 		bool 		is_auth;
 		//////////INVITE//////////
 		int Mode_in_channel;
 		std::set<std::string> joinedChannels;
+		//
+		std::string messageBuffer;
 	public:
 	//////////AUTHENTIFICATE//////////
 		bool is_PASS;
 		bool is_NICK;
 		bool is_USER;
 		bool has_received;
-		std::string messageToSend;
 		bool operator==(const Client &other) const {
         return this->nickname == other.nickname; // Comparaison par pseudo
     	}
@@ -39,6 +41,7 @@ class Client
 		void setServername(std::string Servername);
 		void setRealname(std::string Realname);
 		void setIs_auth(bool value);
+		void setClientIp(int fd);
 		//getters
 		std::string getHostname();
 		std::string getRealname();
@@ -50,6 +53,10 @@ class Client
 		void sendMessage(const std::string &message);
 		std::string getPrefix();
 		std::set<std::string> getJoinedChannels();
+		////////////************ add it to handle buffer ************////////////
+		void appendToBuffer(const std::string& data);
+		std::string getBuffer() const;
+		void clearBuffer();
 };
 
 #endif

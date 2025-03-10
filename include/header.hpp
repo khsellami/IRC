@@ -6,7 +6,7 @@
 #include "Msj.hpp"
 #include "Reply.hpp"
 
-void handle_authentification(Client &client, Msj msj, Server& server);
+int handle_authentification(Client &client, Msj msj, Server& server);
 void handleChannelMode(Client &client, Msj msj, Server &server);
 void parse_message(const std::string &msg1, Client &client, Server &server);
 
@@ -22,5 +22,7 @@ void handle_invite(Server &server, Client &client, Msj &msj);
 void broadcastMessage(Client &client, Channel &channel, std::string message);
 std::string geting_message(const std::string &msg);
 std::string toUpper(const std::string &str);
+bool handle_dcc_message(std::string message, Client &sender, Client &receiver, Server &server);
+std::string trim(const std::string &str);
 
 #endif

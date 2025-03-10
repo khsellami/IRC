@@ -1,3 +1,0 @@
-
-
-if (channel.hasKey)// check the password passed by the client is true, if not : he can't join the channel

@@ -35,6 +35,8 @@ class Channel
 		std::string getTopic(){return topic;}
 		std::vector<Client> getMembers();
 		//
+		//Kick command
+		void removeMember(Client &client);
 		//some MODE member functions
 		void setTopicRestriction(bool status);
 		std::string getModeString();

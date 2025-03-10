@@ -6,7 +6,7 @@
 /*   By: hmraizik <hmraizik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 11:50:06 by hmraizik          #+#    #+#             */
-/*   Updated: 2025/02/28 18:28:30 by hmraizik         ###   ########.fr       */
+/*   Updated: 2025/03/09 21:30:53 by hmraizik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ void  check_Password(Client& client, std::string password, Msj command){
 
 bool check_Dupplicated(Msj command, std::map<int, Client> clients){
     std::map<int, Client>::iterator i = clients.begin();
+    
 
     while (i != clients.end())
     {
@@ -201,7 +202,7 @@ void KillNicknameCollisions(Client& client, std::map<int , Client>& clients)
     }
 }
 
-void handle_authentification(Client &client, Msj msj, Server& server)
+int handle_authentification(Client &client, Msj msj, Server& server)
 {
     // Already registred
     msj.args[0] = toUpper(msj.args[0]);
@@ -210,12 +211,11 @@ void handle_authentification(Client &client, Msj msj, Server& server)
     {
         if (msj.args[0] == "PASS" || msj.args[0] == "USER")
         {
-            client.messageToSend = "462 :You may not reregister\n";
-            client.sendMessage(client.messageToSend);
-            return ;
+            client.sendMessage(ERR_ALREADYREGISTRED(client.getNickName()));
+            return 1;
         }
         else if (msj.args[0] != "NICK")
-            return ;
+            return 0;
     }
     if (msj.args[0] == "NICK" && client.is_NICK && client.is_PASS)
     {
@@ -224,22 +224,21 @@ void handle_authentification(Client &client, Msj msj, Server& server)
     /****** trying other command before registering *************************/
     if (client.getIs_auth() == false && msj.args[0] != "PASS" && msj.args[0] != "NICK" && msj.args[0] != "USER")
     {
-            client.messageToSend = "451 :You have not registered\n";
-            client.sendMessage(client.messageToSend);
-            return ;
+            client.sendMessage(ERR_NOTREGISTERED(client.getNickName()));
+            return 1;
     }
     //
     
     if (!client.is_PASS && msj.args[0] != "PASS")
     {
-        client.messageToSend = "You must enter `PASS <password>` first\n";
-        client.sendMessage(client.messageToSend);
-        return ;
+        std::string message = "451 " + client.getNickName() + " :You have not registered - PASS required first\r\n";
+        client.sendMessage(message);
+        return 1;
     }
     if (!(client.getIs_auth()) && msj.args[0] == "PASS")
     {
         check_Password(client, server.getPassword(), msj);
-        return ;
+        return 1;
     }
     if (!(client.getIs_auth()) && client.is_PASS)
     {
@@ -251,7 +250,7 @@ void handle_authentification(Client &client, Msj msj, Server& server)
         client.setIs_auth(true);
         KillNicknameCollisions(client, server.getClients());
 
-        client.messageToSend = "Welcome, You have registred succesfully!\n";
-        client.sendMessage(client.messageToSend);
+        client.sendMessage(RPL_WELCOME(client.getNickName(), "Welcome to the `SERVER 9DIIM`"));
     }
+    return 1;
 }
