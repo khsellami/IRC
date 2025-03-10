@@ -24,5 +24,6 @@ std::string geting_message(const std::string &msg);
 std::string toUpper(const std::string &str);
 bool handle_dcc_message(std::string message, Client &sender, Client &receiver, Server &server);
 std::string trim(const std::string &str);
+void handleKickCommand(Client &client, Msj msj, Server &server);
 
 #endif

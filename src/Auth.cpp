@@ -6,7 +6,7 @@
 /*   By: hmraizik <hmraizik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 11:50:06 by hmraizik          #+#    #+#             */
-/*   Updated: 2025/03/09 21:30:53 by hmraizik         ###   ########.fr       */
+/*   Updated: 2025/03/09 22:03:51 by hmraizik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,7 +164,6 @@ void prodcastNickUpdated(Server &server, Client& client, std::string oldNick)
     std::string message = oldNick + " changed his nickname to " + client.getNickName();
     while (it != server.getChannels().end())
     {
-        std::cout << it->second.isMember(client) << std::endl;
         if (it->second.isMember(client))
         {
             broadcastMessageForNick(client, it->second, message);
