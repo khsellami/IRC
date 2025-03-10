@@ -20,8 +20,11 @@ Channel::Channel(std::string name) : name_channel(name) ,inviteOnly(false)
 
 void Channel::setLimit(size_t newLimit)
 {
-    limit = newLimit;
-    is_limit = true;
+    if (newLimit > 0)
+    {
+        limit = newLimit;
+        is_limit = true;
+    }
 }
 
 void Channel::removeLimit()
@@ -87,19 +90,15 @@ void Channel::__setOperator(std::string Nickname, bool AddorRemove)
             break;
         }
     }
-    if (!isMember(*it))
-    {
+    if (it == members.end() || !isMember(*it))
         return ;
-    }
     if (AddorRemove && std::find(operators.begin(), operators.end(), *it) == operators.end())
     {
         operators.push_back(*it);
         return ;
     }
     else if (!AddorRemove && (it = std::find(operators.begin(), operators.end(), *it)) != operators.end())
-    {
         operators.erase(it);
-    }
 }
 
 void Channel::setInviteOnly(bool status)

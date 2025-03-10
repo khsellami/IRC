@@ -6,7 +6,6 @@ int main(int ac, char** av)
 {
 	try
 	{
-		
 		signal(SIGPIPE, SIG_IGN);
 		if (ac != 3 || !av[1][0] || !av[2][0])
 			return (1);

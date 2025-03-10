@@ -74,8 +74,5 @@ void parse_message(const std::string &msg1, Client &client, Server &server)
 	else if (msj.args[0].find("!") != std::string::npos)
 		parse_bot_command(msj, client, server);
 	else if (!msj.args[0].empty())
-	{
 		client.sendMessage(ERR_UNKNOWNCOMMAND(msj.args[0]));
-		return ;
-	}
 }

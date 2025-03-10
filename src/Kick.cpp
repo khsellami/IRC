@@ -16,15 +16,13 @@ void handleKickCommand(Client &client, Msj msj, Server &server)
 	}
 	channel_name =  msj.args[1].substr(1);
 	std::string target = msj.args[2];
-	std::string reason = msj.args.size() > 3 ? geting_message(msj.orig_msg) : "Kicked";
-	// i just check first if the channel exist
+	std::string reason = (msj.args.size() > 3 && msj.args[3].find(":") != std::string::npos) ? geting_message(msj.orig_msg) : "Kicked";
 	Channel *channel = server.getChannel(channel_name);
 	if (!channel)
 	{
 		client.sendMessage(ERR_NOSUCHCHANNEL(channel_name));
 		return ;
 	}
-	// just operators can kick members
 	if (!channel->isOperator(client))
 	{
 		client.sendMessage(ERR_CHANOPRIVSNEEDED(channel_name));
