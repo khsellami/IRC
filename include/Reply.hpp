@@ -29,7 +29,6 @@
 #define ERR_INVALIDMODEPARM(channelname, mode)			(std::string(": 696 ") + channelname + " Invalid mode parameter. " + mode + POSTFIX)
 #define ERR_UNKNOWNMODE(nickname, channelname, mode)	(std::string(": 472 ") + nickname + " " + channelname + " " + mode + " :is not a recognised channel mode" + POSTFIX)
 #define ERR_INCORPASS(nickname)							(": 464 " + nickname + " :Password incorrect !" + POSTFIX )
-
 //Replays :
 #define RPL_WELCOME(sender, msg)               			PREFIX "001 " + sender + " : " + msg + POSTFIX 
 #define RPL_NAMREPLY(sender, channel, users)    		PREFIX "353 " + sender + " = " + channel + " :" + users + POSTFIX
@@ -45,7 +44,7 @@
 #define RPL_JOIN(sender, channel)						":" + sender + " JOIN :" + channel + POSTFIX
 #define RPL_CHANGEMODE(hostname, channelname, mode)		(":" + hostname + " MODE " + channelname + " " + mode + POSTFIX)
 #define RPL_UMODEIS(hostname, channelname, mode, user)	":" + hostname + " MODE " + channelname + " " + mode + " " + user + POSTFIX
-
+#define RPL_CHANNELMODEIS(hostname, channelname, mode)	(":" + hostname + " MODE " + channelname + " " + mode + POSTFIX)
 //////////ADDED:////////////////////////////////////////
 //PRIVMSG
 #define ERR_CANNOTSENDTOCHAN(channel)  PREFIX "404 " + channel + " :Cannot send to channel" + POSTFIX 

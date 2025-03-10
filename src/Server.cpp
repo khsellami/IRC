@@ -186,7 +186,6 @@ void Server::connect_client(Server &server)
 					clients[fds[i].fd].clearBuffer();
 					if (!clientBuffer.empty())
 						clients[fds[i].fd].appendToBuffer(clientBuffer);
-					
 				}
 			}
 		}
