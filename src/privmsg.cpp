@@ -59,7 +59,10 @@ void send_user(std::string recv, Server &server, std::string message, Client &cl
 			return; // Important to return after handling
 		}
 		else
-			c->sendMessage(message);
+		{
+			std::string rpl= RPL_PRIVMSG(client.getNickName(), recv, message);
+			c->sendMessage(rpl);
+		}
 	}
 	else
 	{

@@ -20,6 +20,8 @@ class Client
 		//////////INVITE//////////
 		int Mode_in_channel;
 		std::set<std::string> joinedChannels;
+		//
+		std::string messageBuffer;
 	public:
 	//////////AUTHENTIFICATE//////////
 		bool is_PASS;
@@ -51,6 +53,10 @@ class Client
 		void sendMessage(const std::string &message);
 		std::string getPrefix();
 		std::set<std::string> getJoinedChannels();
+		////////////************ add it to handle buffer ************////////////
+		void appendToBuffer(const std::string& data);
+		std::string getBuffer() const;
+		void clearBuffer();
 };
 
 #endif

@@ -122,3 +122,17 @@ std::set<std::string> Client::getJoinedChannels()
 {
 	return joinedChannels;
 }
+
+void Client::appendToBuffer(const std::string& data)
+{ 
+	messageBuffer += data;
+}
+
+std::string Client::getBuffer() const { 
+	return messageBuffer; 
+}
+
+void Client::clearBuffer()
+{ 
+	messageBuffer.clear();
+}

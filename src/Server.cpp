@@ -166,9 +166,27 @@ void Server::connect_client(Server &server)
 						continue;
 					}
 					buffer[bytesRead] = '\0';
+					///////////**** handle message buffering ****///////////
 					std::string message(buffer);
-					std::cout << "Client " << fds[i].fd << " sent: " << message << '\n';
-					parse_message(message, clients[fds[i].fd], server);
+					if (message.empty())
+						continue;
+					clients[fds[i].fd].appendToBuffer(message);//add message to buffer
+
+
+					std::string clientBuffer = clients[fds[i].fd].getBuffer();
+					size_t pos = 0;
+					while ((pos = clientBuffer.find('\n', pos)) != std::string::npos)//check if the message completed by newline
+					{
+						std::string completeMessage = clientBuffer.substr(0, pos + 1);
+						std::cout << "Client " << fds[i].fd << " sent: " << completeMessage << '\n';
+						parse_message(completeMessage, clients[fds[i].fd], server);
+						clientBuffer.erase(0, pos + 1);
+						pos = 0;
+					}
+					clients[fds[i].fd].clearBuffer();
+					if (!clientBuffer.empty())
+						clients[fds[i].fd].appendToBuffer(clientBuffer);
+					
 				}
 			}
 		}
