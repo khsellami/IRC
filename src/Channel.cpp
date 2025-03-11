@@ -124,6 +124,8 @@ void Channel::removeMember(Client &client)
         if (it->getNickName() == client.getNickName())
         {
             members.erase(it);
+            if (this->isOperator(*it))
+                operators.erase(it);
             break;
         }
     }
