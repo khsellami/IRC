@@ -126,7 +126,7 @@ void handle_join(Server &server, Client &client, Msj &msj)
         {
             channel.setOperator(client);
         }
-        channel.broadcast(client.getPrefix() + " JOIN #" + channel_name);
+        channel.broadcast(client.getPrefix() + " JOIN #" + channel_name + "\r\n");
         sendJoinReplies(client, channel);
     }
 }
