@@ -1,6 +1,26 @@
 
 #include "../include/header.hpp"
 
+
+bool	Server::signal_received_flag = false;
+void Server::SignalHandler(int signum)
+{
+	(void)signum;
+	std::cout << std::endl << "Signal Received!" << std::endl;
+	Server::signal_received_flag = true;
+}
+
+void	Server::close_allfds()
+{
+	for (size_t i = 0; i < clients.size(); i++)
+		close(clients[i].getSocket());
+	if (serverSocket != -1)
+	{
+		std::cout << "Server <" << serverSocket << "> disconnected" << std::endl;
+		std::cout << "All clients disconnected" << std::endl;
+		close(serverSocket);
+	}
+}
 Server::Server(){}
 
 Server::Server(int port, std::string password)
@@ -98,8 +118,8 @@ void	Server::run()
 
 void Server::connect_client(Server &server)
 {
-	try
-	{
+	// try
+	// {
 		//add socket server to poll fds
 		struct pollfd new_poll;
 		new_poll.fd = server.getSock();
@@ -107,11 +127,10 @@ void Server::connect_client(Server &server)
 		new_poll.revents = 0;
 		fds.push_back(new_poll);
 
-		while (true)
+		while (Server::signal_received_flag == false)
 		{
-			int ready = poll(&fds[0], fds.size(), 0);
-			if (ready == -1)
-				throw "Error in poll\n";
+			if ((poll(&fds[0], fds.size(), 0) < 0) && (Server::signal_received_flag == false))
+			throw (("Error: poll failed"));
 			///********************* SERVER ===>> Accept de nouvelles connexions *********************************************///
 			/*
 			revents peut contenir plusieurs evenements a la fois : POLLIN | POLLERR
@@ -189,13 +208,14 @@ void Server::connect_client(Server &server)
 				}
 			}
 		}
-	}
-	catch(const char *e)
-	{
-		for (size_t i = 0; i < fds.size(); i++)
-			close(fds[i].fd);
-		std::cout << "Exception " << e << '\n';
-	}
-	for (size_t i = 0; i < fds.size(); i++)
-		close(fds[i].fd);
+		close_allfds();
+	// }
+	// catch(const char *e)
+	// {
+	// 	for (size_t i = 0; i < fds.size(); i++)
+	// 		close(fds[i].fd);
+	// 	std::cout << "Exception " << e << '\n';
+	// }
+	// for (size_t i = 0; i < fds.size(); i++)
+	// 	close(fds[i].fd);
 }

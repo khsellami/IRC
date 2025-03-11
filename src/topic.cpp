@@ -54,7 +54,8 @@ void handle_topic(Server &server, Client &client, Msj msj)
 		//topic exist
 		else
 		{
-			client.sendMessage(ch.getTopic());
+			// client.sendMessage(ch.getTopic());
+			client.sendMessage(RPL_TOPIC(client.getName(),channel_name,ch.getTopic()));
 			return ;
 		}
 	}
