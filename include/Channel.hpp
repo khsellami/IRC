@@ -57,6 +57,8 @@ class Channel
 		void setOperator(Client &client);
 		bool isOperator(Client &client)
 		{
+			if (!this->isMember(client))
+				return false;
 			for (size_t i = 0; i < operators.size(); i++)
 			{
 				if (operators[i].getNickName() == client.getNickName())
