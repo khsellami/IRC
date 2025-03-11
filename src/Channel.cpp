@@ -157,7 +157,7 @@ void Channel::addMember(Client &client)
     if (!isMember(client))
     {
         members.push_back(client);
-        broadcast(client.getNickName() + " has joined the channel.");
+        // broadcast(client.getNickName() + " has joined the channel.");
     }
 }
 
