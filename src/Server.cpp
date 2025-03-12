@@ -116,6 +116,32 @@ void	Server::run()
 	std::cout << "Server is listening on port " << port << '\n';
 }
 
+void removeClient(Server& server, int fd)
+{
+	std::map<int, Client> &clients = server.getClients();
+	std::map<int, Client>::iterator it;
+	Client *client = NULL;
+	for (it = clients.begin(); it != clients.end(); it++)
+	{
+		if (it->first == fd)
+		{
+			client = &it->second;
+			clients.erase(it);
+			break ;
+		}
+	}
+
+	std::map<std::string, Channel> &channels = server.getChannels();
+	std::map<std::string, Channel>::iterator __it;
+
+	if (!client)
+		return ;
+	for (__it = channels.begin(); __it != channels.end(); __it++)
+	{
+			__it->second.removeMember(*client);
+	}
+}
+
 void Server::connect_client(Server &server)
 {
 	// try
@@ -179,6 +205,7 @@ void Server::connect_client(Server &server)
 					if (bytesRead == 0)
 					{
 						std::cout << "Client " << fds[i].fd << " disconnected." << '\n';
+						removeClient(server, fds[i].fd);
 						close(fds[i].fd);
 						fds.erase(fds.begin() + i);
 						i--;
