@@ -39,6 +39,8 @@ void handleKickCommand(Client &client, Msj msj, Server &server)
 		client.sendMessage(ERR_USERNOTINCHANNEL(target, channel_name));
 		return ;
 	}
+	if (channel->isOwner(*targetClient))
+		return;
 	channel->removeMember(*targetClient);
 	targetClient->sendMessage(":" + client.getNickName() + " KICK " + channel_name + " " + target + " :" + reason + "\n");
 	broadcastMessage(client, *channel, ":" + client.getNickName() + " KICK " + channel_name + " " + target + " :" + reason + "\n");

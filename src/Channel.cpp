@@ -131,6 +131,15 @@ void Channel::removeMember(Client &client)
     }
 }
 
+bool Channel::isOwner(Client& client)
+{
+    if (operators.size() < 1)
+        return false;
+    if (!operators.empty() && operators[0].getNickName() == client.getNickName())
+        return true;
+    return false;
+}
+
 std::string Channel::getUserList()
 {
     std::string list;
