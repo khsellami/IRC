@@ -1,6 +1,26 @@
 
 #include "../include/header.hpp"
 
+
+bool	Server::signal_received_flag = false;
+void Server::SignalHandler(int signum)
+{
+	(void)signum;
+	std::cout << std::endl << "Signal Received!" << std::endl;
+	Server::signal_received_flag = true;
+}
+
+void	Server::close_allfds()
+{
+	for (size_t i = 0; i < clients.size(); i++)
+		close(clients[i].getSocket());
+	if (serverSocket != -1)
+	{
+		std::cout << "Server <" << serverSocket << "> disconnected" << std::endl;
+		std::cout << "All clients disconnected" << std::endl;
+		close(serverSocket);
+	}
+}
 Server::Server(){}
 
 Server::Server(int port, std::string password)
@@ -96,10 +116,36 @@ void	Server::run()
 	std::cout << "Server is listening on port " << port << '\n';
 }
 
+void removeClient(Server& server, int fd)
+{
+	std::map<int, Client> &clients = server.getClients();
+	std::map<int, Client>::iterator it;
+	Client *client = NULL;
+	for (it = clients.begin(); it != clients.end(); it++)
+	{
+		if (it->first == fd)
+		{
+			client = &it->second;
+			clients.erase(it);
+			break ;
+		}
+	}
+
+	std::map<std::string, Channel> &channels = server.getChannels();
+	std::map<std::string, Channel>::iterator __it;
+
+	if (!client)
+		return ;
+	for (__it = channels.begin(); __it != channels.end(); __it++)
+	{
+			__it->second.removeMember(*client);
+	}
+}
+
 void Server::connect_client(Server &server)
 {
-	try
-	{
+	// try
+	// {
 		//add socket server to poll fds
 		struct pollfd new_poll;
 		new_poll.fd = server.getSock();
@@ -107,11 +153,10 @@ void Server::connect_client(Server &server)
 		new_poll.revents = 0;
 		fds.push_back(new_poll);
 
-		while (true)
+		while (Server::signal_received_flag == false)
 		{
-			int ready = poll(&fds[0], fds.size(), 0);
-			if (ready == -1)
-				throw "Error in poll\n";
+			if ((poll(&fds[0], fds.size(), 0) < 0) && (Server::signal_received_flag == false))
+			throw (("Error: poll failed"));
 			///********************* SERVER ===>> Accept de nouvelles connexions *********************************************///
 			/*
 			revents peut contenir plusieurs evenements a la fois : POLLIN | POLLERR
@@ -160,6 +205,7 @@ void Server::connect_client(Server &server)
 					if (bytesRead == 0)
 					{
 						std::cout << "Client " << fds[i].fd << " disconnected." << '\n';
+						removeClient(server, fds[i].fd);
 						close(fds[i].fd);
 						fds.erase(fds.begin() + i);
 						i--;
@@ -186,17 +232,17 @@ void Server::connect_client(Server &server)
 					clients[fds[i].fd].clearBuffer();
 					if (!clientBuffer.empty())
 						clients[fds[i].fd].appendToBuffer(clientBuffer);
-					
 				}
 			}
 		}
-	}
-	catch(const char *e)
-	{
-		for (size_t i = 0; i < fds.size(); i++)
-			close(fds[i].fd);
-		std::cout << "Exception " << e << '\n';
-	}
-	for (size_t i = 0; i < fds.size(); i++)
-		close(fds[i].fd);
+		close_allfds();
+	// }
+	// catch(const char *e)
+	// {
+	// 	for (size_t i = 0; i < fds.size(); i++)
+	// 		close(fds[i].fd);
+	// 	std::cout << "Exception " << e << '\n';
+	// }
+	// for (size_t i = 0; i < fds.size(); i++)
+	// 	close(fds[i].fd);
 }

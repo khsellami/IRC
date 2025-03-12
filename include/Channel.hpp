@@ -25,7 +25,8 @@ class Channel
 		bool is_hasKey;
 		bool inviteOnly;
 		bool topicRestricted;
-
+		size_t limit;
+		bool is_limit;
 	public:
 		Channel();
 		Channel(std::string name);
@@ -56,6 +57,8 @@ class Channel
 		void setOperator(Client &client);
 		bool isOperator(Client &client)
 		{
+			if (!this->isMember(client))
+				return false;
 			for (size_t i = 0; i < operators.size(); i++)
 			{
 				if (operators[i].getNickName() == client.getNickName())
@@ -67,15 +70,18 @@ class Channel
         bool hasKey();
 		std::string getKey();
 		std::string getUserList();
-		bool isFull(){return members.size() >= 10;}
+		bool isFull(){return (members.size() >= limit) && is_limit;}
 		void setKey(std::string newKey);
 		void removeKey();
         void setInviteOnly(bool status);
+		void setLimit(size_t newLimit);
+		void removeLimit();
 		void broadcast(const std::string &message);
 		bool isBanned(Client &client);
 		void addMember(Client &client);
 		bool isMember(Client &client);
 		void invite(Client &client);
+		bool isOwner(Client& client);
 
 };
 

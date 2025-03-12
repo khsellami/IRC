@@ -66,3 +66,22 @@ in Channel::invite()
 invite.cpp still have some replies to handle
 
 
+//SIGPIPE
+Default SIGPIPE Behavior:
+If a client disconnects (closing their socket)
+And you try to send data to that closed socket
+The OS generates a SIGPIPE signal
+By default, SIGPIPE immediately terminates the server process
+Real-world Consequences:
+One client disconnection could crash your entire IRC server
+All other connected clients would be disconnected
+The server would need to be manually restarted
+Why This Happens:
+This behavior dates back to early Unix pipe implementations
+It was designed to terminate shell pipelines when one command exits
+The same behavior was applied to sockets for consistency
+
+
+
+
+

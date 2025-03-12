@@ -54,7 +54,8 @@ void handle_topic(Server &server, Client &client, Msj msj)
 		//topic exist
 		else
 		{
-			client.sendMessage(ch.getTopic());
+			// client.sendMessage(ch.getTopic());
+			client.sendMessage(RPL_TOPIC(client.getName(),channel_name,ch.getTopic()));
 			return ;
 		}
 	}
@@ -62,11 +63,11 @@ void handle_topic(Server &server, Client &client, Msj msj)
 	else
 	{
 		//message not start with :
-		if (msj.args[2][0] != ':')
-		{
-			client.sendMessage(RPL_NOTOPIC(client.getName(),channel_name));
-			return ;
-		}
+		// if (msj.args[2][0] != ':')
+		// {
+		// 	client.sendMessage(RPL_NOTOPIC(client.getName(),channel_name));
+		// 	return ;
+		// }
 		//No permissions
 		if (!ch.isOperator(client) && ch.getTopicRestriction())
 		{
@@ -76,6 +77,9 @@ void handle_topic(Server &server, Client &client, Msj msj)
 		//Has permissions
 		std::string newTopic;
 		newTopic = geting_message(msj.orig_msg);
+		if (newTopic.empty())
+			newTopic = msj.args[2];
+		std::cout << newTopic << std::endl;
 		// ch.setTopic(newTopic);
 		server.getChannels()[channel_name].setTopic(newTopic);
 		//broadcastmessage to all members in channel expect client itself

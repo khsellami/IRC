@@ -37,18 +37,29 @@ std::string trim(const std::string &str)
 	return str.substr(first, last - first + 1);
 }
 
+std::string extractCommand(std::string message)
+{
+    message = message.substr(message.find(" "));
+    std::string command;
+    for (size_t i = 0; i < message.size() && message[i] != '\r' && message[i] != '\n'; i++)
+    {
+        command += message[i];
+    }
+    return command;
+}
+
 void handle_message(std::string message, int fd)
 {
     std::string target = message.substr(0, message.find(" ")); 
-    std::string command = trim(message.substr(message.find(" ")));
-    std::cout << "[" << command << "]" << std::endl;
+    std::string command = extractCommand(message);
+    command = trim(command);
     if (command == "!HELP")
     {
-        std::string help_message = "PRIVMSG " + target + " :Hello, I am the bot. I can help you with the following commands:\n";
-        help_message += "!HELP: Show this help message\n";
-        help_message += "!TIME: Show the current time\n";
-        help_message += "!QUOTE: Show a random quote\n";
-        send(fd, help_message.c_str(), help_message.size() + 10, 0);
+        std::string help_message = "PRIVMSG " + target + " :Hello, I am the bot. I can help you with the following commands:";
+        help_message += "[!HELP: Show this help message], ";
+        help_message += "[!TIME: Show the current time], ";
+        help_message += "[!QUOTE: Show a random quote]\r\n";
+        send(fd, help_message.c_str(), help_message.size(), 0);
     }
     else if (command == "!TIME")
     {
@@ -71,7 +82,6 @@ void handle_message(std::string message, int fd)
     }
 }
 
-//do not forget to check and marque the nick name of the bot as NICKINUSE
 int main(int argc, char *argv[])
 {
     if (argc != 4)
@@ -94,8 +104,6 @@ int main(int argc, char *argv[])
         std::cerr << "connect() failed" << std::endl;
         return 1;
     }
-    //send the auth messages
-    
     std::string message = "PASS " + std::string(argv[3]) + "\r\n";
     if (send(fd, message.c_str(), message.size(), 0) < 0)
     {
