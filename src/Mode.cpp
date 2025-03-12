@@ -61,7 +61,13 @@ void handleChannelMode(Client &client, Msj msj, Server &server)
                     channel->removeKey();
                 break;
             case 'o':
-                if (argIndex < msj.args.size()){
+                if (argIndex >= msj.args.size())
+                {
+                    client.sendMessage(ERR_NONICKNAMEGIVEN(msj.args[argIndex]));
+                    return;
+                }
+                if (argIndex < msj.args.size())
+                {
                     Client *targetClient = server.getClientByName(msj.args[argIndex]);
                     if (!targetClient || !channel->isMember(*targetClient))
                     {

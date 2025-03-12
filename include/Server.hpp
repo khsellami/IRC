@@ -23,7 +23,7 @@ class Server
 	int 		port;
 	std::string password;
 	public:
-	int			serverSocket;
+		int			serverSocket;
 		Server();
 		Channel* getChannel(const std::string& channelName);
 		std::string getPassword();
@@ -38,6 +38,7 @@ class Server
 		void	close_allfds();
 		static bool signal_received_flag;
 		static void SignalHandler(int signum);
+		
 	
 };
 void handleDCCSend(Client &sender, const std::string &message);

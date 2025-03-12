@@ -81,6 +81,7 @@ class Channel
 		void addMember(Client &client);
 		bool isMember(Client &client);
 		void invite(Client &client);
+		bool isOwner(Client& client);
 
 };
 
