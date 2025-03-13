@@ -56,5 +56,5 @@ void handle_invite(Server &server, Client &client, Msj &msj)
     }
     channel.invite(*target_client);
     client.sendMessage(RPL_INVITING(client.getName(), target_nickname, channel_name)); // RPL_INVITING
-    target_client->sendMessage(":" + client.getNickName() + " INVITE " + target_nickname + " " + channel_name);
+    target_client->sendMessage(":" + client.getNickName() + " INVITE " + target_nickname + " " + channel_name + "\n");
 }

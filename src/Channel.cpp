@@ -191,7 +191,7 @@ void Channel::invite(Client &client)
     if (!isInvited(client))
     {
         invited.push_back(client);
-        client.sendMessage("You have been invited to " + name_channel);
+        // client.sendMessage("You have been invited to " + name_channel);
     }
 }
 
