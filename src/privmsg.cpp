@@ -108,6 +108,7 @@ void handle_privmsg(Server &server, Client &client, Msj msj)
 		client.sendMessage(ERR_NOTEXTTOSEND());
 		return ;
 	}
+	
 	//****Extract Receivers***********************************//
 	std::vector<std::string> receivers;
 	receivers = extract_recv(msj);

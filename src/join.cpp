@@ -107,6 +107,11 @@ void handle_join(Server &server, Client &client, Msj &msj)
             continue;
         }
         channel_name = channel_name.substr(1);
+        if (channel_name.empty())
+        {
+            client.sendMessage(ERR_NOSUCHCHANNEL(channel_name));
+            continue;
+        }
 
         std::map<std::string, Channel> &channelMap = server.getChannels();
         bool is_new_channel = (channelMap.find(channel_name) == channelMap.end());

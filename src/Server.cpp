@@ -1,12 +1,12 @@
+
 #include "../include/header.hpp"
-#include <csignal>
 
 
 bool	Server::signal_received_flag = false;
 void Server::SignalHandler(int signum)
 {
 	(void)signum;
-	std::cout << std::endl << "Signal Received! Initiating shutdown..." << std::endl;
+	std::cout << std::endl << "Signal Received!" << std::endl;
 	Server::signal_received_flag = true;
 }
 
@@ -107,22 +107,13 @@ void	Server::run()
 		throw "Error in bind\n";
 	}
 	///********************* socket in mode listen *********************************************///
-	//SOMAXCONN ==>>> la longueur maximale de la file d'attente des connexions entrantes
+	//SOMAXCONN ==>>> la longueur maximale de la file d’attente des connexions entrantes
 	if (listen(serverSocket, SOMAXCONN) == -1)
 	{
 		close(serverSocket);
 		throw "Error in listen\n";
 	}
 	std::cout << "Server is listening on port " << port << '\n';
-
-	// Set up signal handler for SIGINT
-	struct sigaction sa;
-	sa.sa_handler = Server::SignalHandler;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
-	if (sigaction(SIGINT, &sa, NULL) == -1) {
-		throw "Error setting up signal handler\n";
-	}
 }
 
 void removeClient(Server& server, int fd)
@@ -153,6 +144,7 @@ void removeClient(Server& server, int fd)
 
 void Server::connect_client(Server &server)
 {
+
 		struct pollfd new_poll;
 		new_poll.fd = server.getSock();
 		new_poll.events = POLLIN;
@@ -240,14 +232,6 @@ void Server::connect_client(Server &server)
 						clients[fds[i].fd].appendToBuffer(clientBuffer);
 				}
 			}
-
-			// Check for signal_received_flag after poll
-			if (Server::signal_received_flag) {
-				break;
-			}
 		}
-
-		// Perform cleanup
 		close_allfds();
-		std::cout << "Server shutdown complete." << std::endl;
 }
