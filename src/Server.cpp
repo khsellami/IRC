@@ -77,7 +77,7 @@ std::map<int , Client>& Server::getClients()
 
 void	Server::run()
 {
-	int opt = 1;
+	// int opt = 1;
 	///********************* create socket *********************************************///
 	//AF_INET ==>>> Adresse IPv4
 	//SOCK_STREAM ==>>> Mode TCP 
@@ -85,11 +85,11 @@ void	Server::run()
 	if (serverSocket == -1)
 		throw "Error when creating socket\n";
 	///********************* configuration socket *********************************************///
-	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR,  (char *) &opt, sizeof(opt))) //reutiliser adresse apres fermuture
-	{
-		close(serverSocket);
-		throw "Error when set socket in reuse address\n";
-	}
+	// if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR,  (char *) &opt, sizeof(opt))) //reutiliser adresse apres fermuture
+	// {
+	// 	close(serverSocket);
+	// 	throw "Error when set socket in reuse address\n";
+	// }
 	if (fcntl(serverSocket, F_SETFL, O_NONBLOCK) == -1) //mode non-bloquant
 	{
 		close(serverSocket);
@@ -144,9 +144,7 @@ void removeClient(Server& server, int fd)
 
 void Server::connect_client(Server &server)
 {
-	// try
-	// {
-		//add socket server to poll fds
+
 		struct pollfd new_poll;
 		new_poll.fd = server.getSock();
 		new_poll.events = POLLIN;
@@ -236,13 +234,4 @@ void Server::connect_client(Server &server)
 			}
 		}
 		close_allfds();
-	// }
-	// catch(const char *e)
-	// {
-	// 	for (size_t i = 0; i < fds.size(); i++)
-	// 		close(fds[i].fd);
-	// 	std::cout << "Exception " << e << '\n';
-	// }
-	// for (size_t i = 0; i < fds.size(); i++)
-	// 	close(fds[i].fd);
 }
