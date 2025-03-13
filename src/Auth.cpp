@@ -19,8 +19,6 @@
 
 void broadcastMessageForNick(Client &client, Channel &channel, std::string message)
 {
-	//Extract the members of the channel
-	std::vector <Client> toSend = channel.getMembers();
 	for (size_t i=0 ; i < channel.getMembers().size(); i++)
 	{
 		//skip the client that send the message to the channel
@@ -161,7 +159,7 @@ void reset_hasReceivedBool(Server& server, Client& client){
 void prodcastNickUpdated(Server &server, Client& client, std::string oldNick)
 {
     std::map<std::string, Channel>::iterator it = server.getChannels().begin();
-    std::string message = oldNick + " changed his nickname to " + client.getNickName();
+    std::string message = ":" + oldNick + "!user@host NICK :" + client.getNickName() + "\r\n";
     while (it != server.getChannels().end())
     {
         if (it->second.isMember(client))
@@ -194,7 +192,7 @@ void KillNicknameCollisions(Client& client, std::map<int , Client>& clients)
     for (i = clients.begin(); i != clients.end(); ++i){
         if (i->second.getNickName() == client.getNickName() &&  i->second.getSocket() != client.getSocket())
         {
-            std::string message = "436 " + client.getNickName() + ":Nickname collision KILL\n";
+            std::string message = "436 " + client.getNickName() + ":Nickname collision KILL\r\n";
             i->second.sendMessage(message);
             close(i->second.getSocket());
         }

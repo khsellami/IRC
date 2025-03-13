@@ -28,7 +28,8 @@ void parse_bot_command(Msj &msj, Client &client, Server &server)
 		send(client.getSocket(), message.c_str(), message.size(), 0);
 		return ;
 	}
-	if (msj.args[0].find("!HELP") != std::string::npos || msj.args[0].find("!TIME") != std::string::npos || msj.args[0].find("!QUOTE") != std::string::npos)
+	if (msj.args[0].find("!HELP") != std::string::npos || msj.args[0].find("!TIME") != std::string::npos 
+	|| msj.args[0].find("!QUOTE") != std::string::npos || msj.args[0].find("!WEATHER") != std::string::npos)
 	{
 		if (send(bot->getSocket(), messageWithNick.c_str(), messageWithNick.size(), 0) < 0)
 		{

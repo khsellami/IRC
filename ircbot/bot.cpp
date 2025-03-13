@@ -1,5 +1,76 @@
 #include "bot.hpp"
 
+
+#include <netdb.h>      // For gethostbyname
+std::string Bot::getWeatherForCity(const std::string& cityName)
+{
+    std::string city = cityName;
+    if (city.empty())
+        city = "Paris";
+    int socketFd;
+    struct hostent *weatherServer;
+    struct sockaddr_in serverAddress;
+    std::string weatherData = "Weather unavailable";
+    char buffer[4096];
+    int bytesRead;
+
+    socketFd = socket(AF_INET, SOCK_STREAM, 0);
+    if (socketFd < 0) {
+        return "Error: Couldn't create socket";
+    }
+
+    weatherServer = gethostbyname("wttr.in");
+    if (weatherServer == NULL) {
+        close(socketFd);
+        return "Error: Couldn't find weather server";
+    }
+
+    memset(&serverAddress, 0, sizeof(serverAddress));
+    serverAddress.sin_family = AF_INET;
+    memcpy(&serverAddress.sin_addr.s_addr, weatherServer->h_addr, weatherServer->h_length);
+    serverAddress.sin_port = htons(80);  // HTTP port
+    
+    if (connect(socketFd, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) {
+        close(socketFd);
+        return "Error: Couldn't connect to weather service";
+    }
+    
+    std::string cityForUrl = city;
+    size_t spacePos = 0;
+    while ((spacePos = cityForUrl.find(" ", spacePos)) != std::string::npos) {
+        cityForUrl.replace(spacePos, 1, "+");
+        spacePos++;
+    }
+    
+    std::string requestPath = "/" + cityForUrl + "?format=%l:+%c+%t+%h+%w";
+    std::string request = "GET " + requestPath + " HTTP/1.0\r\n";
+    request += "Host: wttr.in\r\n";
+    request += "Connection: close\r\n\r\n";
+    
+    if (send(socketFd, request.c_str(), request.length(), 0) < 0) {
+        close(socketFd);
+        return "Error: Couldn't send request to weather service";
+    }
+    
+    std::string response = "";
+    while ((bytesRead = recv(socketFd, buffer, sizeof(buffer), 0)) > 0) {
+        buffer[bytesRead] = '\0';
+        response += buffer;
+    }
+    
+    close(socketFd);
+    
+    size_t bodyStart = response.find("\r\n\r\n");
+    if (bodyStart != std::string::npos) {
+        weatherData = response.substr(bodyStart + 4);
+        weatherData = trim(weatherData);
+    }
+    
+    return weatherData;
+}
+
+
+
 const std::string Bot::quotes[20] = {
     "The only way to do great work is to love what you do. - Steve Jobs",
     "In the middle of every difficulty lies opportunity. - Albert Einstein",
@@ -145,10 +216,13 @@ void Bot::handle_message(std::string message)
     command = trim(command);
     if (command == "!HELP")
     {
-        std::string help_message = "PRIVMSG " + target + " :Hello, I am the bot. I can help you with the following commands:";
-        help_message += "[!HELP: Show this help message], ";
-        help_message += "[!TIME: Show the current time], ";
-        help_message += "[!QUOTE: Show a random quote]\r\n";
+        std::string help_message = "PRIVMSG " + target + " :Hello, I am a Utility bot. I can help you with the following commands:\r\n";
+        send(fd, help_message.c_str(), help_message.size(), 0);
+        help_message = "PRIVMSG " + target + " :!HELP: Show this help message.\r\n";
+        send(fd, help_message.c_str(), help_message.size(), 0);
+        help_message = "PRIVMSG " + target + " :!TIME: Show the current time.\r\n";
+        send(fd, help_message.c_str(), help_message.size(), 0);
+        help_message = "PRIVMSG " + target + " :!QUOTE: Show a random quote.\r\n";
         send(fd, help_message.c_str(), help_message.size(), 0);
     }
     else if (command == "!TIME")
@@ -168,6 +242,16 @@ void Bot::handle_message(std::string message)
         if (send(fd, quote_message.c_str(), quote_message.size(), 0) < 0)
         {
             std::cerr << "send() failed" << std::endl;
+        }
+    }
+    else if (command == "!WEATHER")
+    {
+        std::string city = message.substr(message.find(" ") + 1);
+        std::string weather = getWeatherForCity(city);
+
+        std::string weather_message = "PRIVMSG " + target + " :" + weather + "\r\n";
+        if (send(fd, weather_message.c_str(), weather_message.size(), 0) < 0) {
+            std::cerr << "Failed to send weather data" << std::endl;
         }
     }
 }

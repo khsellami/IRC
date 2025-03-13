@@ -18,6 +18,11 @@ bool isNumber(const std::string &str)
 
 void handleChannelMode(Client &client, Msj msj, Server &server)
 {
+    if (msj.args.size() < 2)
+    {
+        client.sendMessage(ERR_NEEDMOREPARAMS(msj.args[0]));
+        return;
+    }
     std::string channel_name = (msj.args[1][0] == '#' || msj.args[1][0] == '&') ? msj.args[1].substr(1) : msj.args[1];
     Channel* channel = server.getChannel(channel_name);
     if (!channel)
