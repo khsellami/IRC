@@ -35,7 +35,6 @@ void handle_invite(Server &server, Client &client, Msj &msj)
     if (!checkChannelExist(server.getChannels(), channel_name))
     {
         client.sendMessage(RPL_INVITING(client.getName(), target_nickname, channel_name));
-        target_client->sendMessage(":" + client.getNickName() + " INVITE " + target_nickname + " " + channel_name);
         return;
     }
     Channel &channel = server.getChannels()[channel_name];
