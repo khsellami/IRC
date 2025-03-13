@@ -18,7 +18,6 @@ class Client
 		std::string realname;
 		bool 		is_auth;
 		//////////INVITE//////////
-		int Mode_in_channel;
 		std::set<std::string> joinedChannels;
 		//
 		std::string messageBuffer;

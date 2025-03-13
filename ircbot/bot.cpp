@@ -145,10 +145,13 @@ void Bot::handle_message(std::string message)
     command = trim(command);
     if (command == "!HELP")
     {
-        std::string help_message = "PRIVMSG " + target + " :Hello, I am the bot. I can help you with the following commands:";
-        help_message += "[!HELP: Show this help message], ";
-        help_message += "[!TIME: Show the current time], ";
-        help_message += "[!QUOTE: Show a random quote]\r\n";
+        std::string help_message = "PRIVMSG " + target + " :Hello, I am a Utility bot. I can help you with the following commands:\r\n";
+        send(fd, help_message.c_str(), help_message.size(), 0);
+        help_message = "PRIVMSG " + target + " :!HELP: Show this help message.\r\n";
+        send(fd, help_message.c_str(), help_message.size(), 0);
+        help_message = "PRIVMSG " + target + " :!TIME: Show the current time.\r\n";
+        send(fd, help_message.c_str(), help_message.size(), 0);
+        help_message = "PRIVMSG " + target + " :!QUOTE: Show a random quote.\r\n";
         send(fd, help_message.c_str(), help_message.size(), 0);
     }
     else if (command == "!TIME")
