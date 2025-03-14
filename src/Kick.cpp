@@ -16,7 +16,7 @@ void handleKickCommand(Client &client, Msj msj, Server &server)
 	}
 	channel_name =  msj.args[1].substr(1);
 	std::string target = msj.args[2];
-	std::string reason = (msj.args.size() > 3 && msj.args[3].find(":") != std::string::npos) ? geting_message(msj.orig_msg) : "Kicked";
+	std::string reason = (msj.args.size() > 3 && msj.args[3].find(":") != std::string::npos) ? geting_message(msj.orig_msg) : "Just Kicked";
 	Channel *channel = server.getChannel(channel_name);
 	if (!channel)
 	{
@@ -42,6 +42,6 @@ void handleKickCommand(Client &client, Msj msj, Server &server)
 	if (channel->isOwner(*targetClient))
 		return;
 	channel->removeMember(*targetClient);
-	targetClient->sendMessage(":" + client.getNickName() + " KICK " + channel_name + " " + target + " :" + reason + "\n");
-	broadcastMessage(client, *channel, ":" + client.getNickName() + " KICK " + channel_name + " " + target + " :" + reason + "\n");
+	targetClient->sendMessage(":" + client.getNickName() + " KICK " + channel_name + " " + target + " :" + reason + "\r\n");
+	broadcastMessage(client, *channel, ":" + client.getNickName() + " KICK " + channel_name + " " + target + " :" + reason + "\r\n");
 }

@@ -17,8 +17,6 @@ class Bot
         void setRegistred(bool registred);
         bool isRegistred();
         void handle_message(std::string message);
-        std::string getWeatherForCity(const std::string& cityName);
-
 
     private:
         int fd;
