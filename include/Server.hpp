@@ -38,6 +38,7 @@ class Server
 		void	close_allfds();
 		static bool signal_received_flag;
 		static void SignalHandler(int signum);
+		std::string getHost(){return "localhost";}
 		
 	
 };
