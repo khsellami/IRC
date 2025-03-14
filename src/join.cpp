@@ -7,7 +7,7 @@
 
 bool isJoinAllowed(Client &client, Channel &channel, const std::string &key)
 {
-    if (channel.iSInviteOnly() && !channel.isInvited(client))// ila kant invite only khas dk cleient ikon f vector dyal li m invityn
+    if (channel.iSInviteOnly() && !channel.isInvited(client))
     {
         client.sendMessage(ERR_INVITEONLYCHAN(client.getName(), channel.getName()));
         return false;
@@ -90,7 +90,7 @@ void handle_join(Server &server, Client &client, Msj &msj)
             continue;
         }
 
-        std::map<std::string, Channel> &channelMap = server.getChannels();//alias
+        std::map<std::string, Channel> &channelMap = server.getChannels();
         bool is_new_channel = (channelMap.find(channel_name) == channelMap.end());
 
         if (is_new_channel)
@@ -106,7 +106,7 @@ void handle_join(Server &server, Client &client, Msj &msj)
         
         if (is_new_channel)
             channel.setOperator(client);
-        channel.broadcast(client.getPrefix() + " JOIN #" + channel_name + "\n");
+        channel.broadcast(client.getPrefix() + " JOIN #" + channel_name + "\r\n");
         sendJoinReplies(client, channel);
     }
 }
