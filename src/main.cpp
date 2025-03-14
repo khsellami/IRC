@@ -1,30 +1,45 @@
 
 #include "../include/Server.hpp"
 #include "../include/Client.hpp"
-void d()
+
+int is_valid_port(const char *port_str)
 {
-	system("lsof ircserv");
+	for (int i = 0; port_str[i]; i++)
+    {
+        if (!std::isdigit(port_str[i]))
+        {
+            std::cerr << "Error Port must contain only digits (0-9).\n";
+            return false;
+        }
+    }
+    int port = std::atoi(port_str);
+    if (port < 1 || port > 65535)
+    {
+        std::cerr << "Error Invalid port number\n";
+        return (0);
+    }
+    return (1);
 }
+
+
 int main(int ac, char** av)
 {
-	// atexit(d);
-	if (ac != 3 || !av[1][0] || !av[2][0])
+	if (ac != 3 || !av[1][0] || !av[2][0] || !is_valid_port(av[1]))
 		return (1);
 	Server server(std::atoi(av[1]), std::string(av[2]));
 	try
 	{
 		signal(SIGPIPE, SIG_IGN);
-		signal(SIGINT, Server::SignalHandler);//
-		signal(SIGQUIT, Server::SignalHandler);//
+		signal(SIGINT, Server::SignalHandler);
+		signal(SIGQUIT, Server::SignalHandler);
 		server.run();
 		server.connect_client(server);
-		close(server.getSock());
+		sleep(1);
 		return (0);
 	}
 	catch(const char *e)
 	{
-		server.close_allfds();//
+		server.close_allfds();
 		std::cout << "Exception : " << e << '\n';
 	}
 }
-

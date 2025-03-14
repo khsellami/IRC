@@ -22,8 +22,8 @@ class Server
 	
 	int 		port;
 	std::string password;
-	public:
 		int			serverSocket;
+	public:
 		Server();
 		Channel* getChannel(const std::string& channelName);
 		std::string getPassword();
