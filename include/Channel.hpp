@@ -56,7 +56,6 @@ class Channel
 		void setLimit(size_t newLimit);
 		void removeLimit();
 		void broadcast(const std::string &message);
-		bool isBanned(Client &client);
 		void addMember(Client &client);
 		bool isMember(Client &client);
 		void invite(Client &client);

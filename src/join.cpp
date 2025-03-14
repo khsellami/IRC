@@ -13,12 +13,6 @@ bool isJoinAllowed(Client &client, Channel &channel, const std::string &key)
         return false;
     }
 
-    if (channel.isBanned(client))
-    {
-        client.sendMessage(ERR_BANNEDFROMCHAN(channel.getName(), client.getName()));
-        return false;
-    }
-
     if (channel.hasKey() && channel.getKey() != key)
     {
         client.sendMessage(ERR_BADCHANNELKEY(channel.getName(), client.getName()));
@@ -50,22 +44,6 @@ void sendJoinReplies(Client &client, Channel &channel)
     }
     client.sendMessage(RPL_NAMREPLY(client.getName(), channel.getName(), channel.getUserList()));
     client.sendMessage(RPL_ENDOFNAMES(client.getName(), channel.getName()));
-}
-
-bool only_one_channel(const std::vector<std::string> &args)
-{
-    if (args.empty()) 
-        return true;
-
-    std::string channels = args[1];
-
-    for (size_t i = 0; i < channels.size(); i++)
-    {
-        if (channels[i] == ',' && i + 1 < channels.size() && channels[i + 1] == '#')
-            return false;
-    }
-    
-    return true;
 }
 
 
@@ -128,7 +106,7 @@ void handle_join(Server &server, Client &client, Msj &msj)
         
         if (is_new_channel)
             channel.setOperator(client);
-        channel.broadcast(client.getPrefix() + " JOIN #" + channel_name + "\n");
+        channel.broadcast(client.getPrefix() + " JOIN #" + channel_name + "\r\n");
         sendJoinReplies(client, channel);
     }
 }

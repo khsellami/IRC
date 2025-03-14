@@ -111,11 +111,6 @@ void Channel::setName(std::string name)
     name_channel = name;
 }
 
-bool Channel::isBanned(Client &client)
-{
-    return std::find(bannedUsers.begin(), bannedUsers.end(), client.getName()) != bannedUsers.end();
-}
-
 void Channel::removeMember(Client &client)
 {
     std::vector<Client>::iterator it;
