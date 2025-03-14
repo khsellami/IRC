@@ -134,3 +134,7 @@ void Client::clearBuffer()
 { 
 	messageBuffer.clear();
 }
+// bool Client::operator==(const Client &other) const
+// {
+//     return this->nickname == other.nickname;
+// }

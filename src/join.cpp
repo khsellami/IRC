@@ -1,9 +1,8 @@
+
 #include "../include/Server.hpp"
 #include "../include/Client.hpp"
 #include "../include/Msj.hpp"
 #include "../include/Channel.hpp"
-#include <iostream>
-#include <vector>
 #include "../include/Reply.hpp"
 
 bool isJoinAllowed(Client &client, Channel &channel, const std::string &key)
@@ -129,7 +128,7 @@ void handle_join(Server &server, Client &client, Msj &msj)
         
         if (is_new_channel)
             channel.setOperator(client);
-        channel.broadcast(client.getPrefix() + " JOIN #" + channel_name + "\r\n");
+        channel.broadcast(client.getPrefix() + " JOIN #" + channel_name + "\n");
         sendJoinReplies(client, channel);
     }
 }

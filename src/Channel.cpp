@@ -207,3 +207,29 @@ void Channel::setOperator(Client &client)
     if (std::find(operators.begin(), operators.end(), client) == operators.end())
         operators.push_back(client);
 }
+	
+bool Channel::isInvited(Client &client)
+{
+	for (size_t i = 0; i < invited.size(); i++)
+	{
+		if (invited[i].getNickName() == client.getNickName())
+			return true;
+	}
+	return false;
+}
+bool Channel::isOperator(Client &client)
+{
+	if (!this->isMember(client))
+		return false;
+	for (size_t i = 0; i < operators.size(); i++)
+	{
+		if (operators[i].getNickName() == client.getNickName())
+			return true;
+	}
+	return false;
+}
+
+bool Channel::isFull()
+{
+    return (members.size() >= limit) && is_limit;
+}

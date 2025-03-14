@@ -27,9 +27,7 @@ class Client
 		bool is_NICK;
 		bool is_USER;
 		bool has_received;
-		bool operator==(const Client &other) const {
-        return this->nickname == other.nickname; // Comparaison par pseudo
-    	}
+		bool operator==(const Client &other) const;
 		Client();
 		//setters
 		void setSocket(int fd);
