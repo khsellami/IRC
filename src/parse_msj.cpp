@@ -48,7 +48,8 @@ void parse_message(const std::string &msg1, Client &client, Server &server)
 {
 	Msj msj;
 	std::string msg = trim(msg1);
-
+	if (msg.empty())
+		return;
 	std::stringstream  ss(msg);
 	std::string word;
 	while (ss >> word)
