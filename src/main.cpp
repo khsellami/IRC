@@ -34,7 +34,6 @@ int main(int ac, char** av)
 		signal(SIGQUIT, Server::SignalHandler);
 		server.run();
 		server.connect_client(server);
-		sleep(1);
 		return (0);
 	}
 	catch(const char *e)

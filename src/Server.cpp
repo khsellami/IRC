@@ -77,10 +77,10 @@ void	Server::run()
 	serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverSocket == -1)
 		throw "Error when creating socket";
-	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)))
-		throw "Error when set socket in reuse address\n";
+	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) 
+		throw "Error when set socket in reuse address";
 	if (fcntl(serverSocket, F_SETFL, O_NONBLOCK) == -1)
-		throw "Error when set socket in non bloquant\n";
+		throw "Error when set socket in non bloquant";
 	struct sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;
 	serverAddress.sin_port = htons(port);

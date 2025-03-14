@@ -47,7 +47,6 @@ void handle_topic(Server &server, Client &client, Msj msj)
 		newTopic = geting_message(msj.orig_msg);
 		if (newTopic.empty())
 			newTopic = msj.args[2];
-		std::cout << newTopic << std::endl;
 		server.getChannels()[channel_name].setTopic(newTopic);
 		std::string rpl = RPL_TOPIC(client.getName(), channel_name, newTopic);
 		broadcastMessage(client, ch, rpl);
