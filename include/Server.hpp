@@ -22,8 +22,8 @@ class Server
 	
 	int 		port;
 	std::string password;
-	public:
 		int			serverSocket;
+	public:
 		Server();
 		Channel* getChannel(const std::string& channelName);
 		std::string getPassword();
@@ -38,6 +38,7 @@ class Server
 		void	close_allfds();
 		static bool signal_received_flag;
 		static void SignalHandler(int signum);
+		std::string getHost(){return "localhost";}
 		
 	
 };

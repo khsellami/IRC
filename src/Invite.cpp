@@ -2,8 +2,6 @@
 #include "../include/Client.hpp"
 #include "../include/Msj.hpp"
 #include "../include/Channel.hpp"
-#include <iostream>
-#include <vector> 
 #include "../include/Reply.hpp" 
 
 
@@ -35,7 +33,6 @@ void handle_invite(Server &server, Client &client, Msj &msj)
     if (!checkChannelExist(server.getChannels(), channel_name))
     {
         client.sendMessage(RPL_INVITING(client.getName(), target_nickname, channel_name));
-        target_client->sendMessage(":" + client.getNickName() + " INVITE " + target_nickname + " " + channel_name);
         return;
     }
     Channel &channel = server.getChannels()[channel_name];
@@ -55,6 +52,6 @@ void handle_invite(Server &server, Client &client, Msj &msj)
         return;
     }
     channel.invite(*target_client);
-    client.sendMessage(RPL_INVITING(client.getName(), target_nickname, channel_name)); // RPL_INVITING
-    target_client->sendMessage(":" + client.getNickName() + " INVITE " + target_nickname + " " + channel_name);
+    client.sendMessage(RPL_INVITING(client.getName(), target_nickname, channel_name));
+    target_client->sendMessage(":" + client.getNickName() + " INVITE " + target_nickname + " " + channel_name + "\r\n");
 }

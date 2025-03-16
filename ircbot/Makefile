@@ -4,7 +4,7 @@ CPPFLAGS = -Wall -Wextra -Werror -std=c++98
 
 NAME = ircbot
 
-SRCS = ./bot.cpp
+SRCS = bot.cpp main.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 

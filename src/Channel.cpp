@@ -111,11 +111,6 @@ void Channel::setName(std::string name)
     name_channel = name;
 }
 
-bool Channel::isBanned(Client &client)
-{
-    return std::find(bannedUsers.begin(), bannedUsers.end(), client.getName()) != bannedUsers.end();
-}
-
 void Channel::removeMember(Client &client)
 {
     std::vector<Client>::iterator it;
@@ -191,7 +186,7 @@ void Channel::invite(Client &client)
     if (!isInvited(client))
     {
         invited.push_back(client);
-        client.sendMessage("You have been invited to " + name_channel);
+        // client.sendMessage("You have been invited to " + name_channel);
     }
 }
 
@@ -206,4 +201,30 @@ void Channel::setOperator(Client &client)
         return;
     if (std::find(operators.begin(), operators.end(), client) == operators.end())
         operators.push_back(client);
+}
+	
+bool Channel::isInvited(Client &client)
+{
+	for (size_t i = 0; i < invited.size(); i++)
+	{
+		if (invited[i].getNickName() == client.getNickName())
+			return true;
+	}
+	return false;
+}
+bool Channel::isOperator(Client &client)
+{
+	if (!this->isMember(client))
+		return false;
+	for (size_t i = 0; i < operators.size(); i++)
+	{
+		if (operators[i].getNickName() == client.getNickName())
+			return true;
+	}
+	return false;
+}
+
+bool Channel::isFull()
+{
+    return (members.size() >= limit) && is_limit;
 }

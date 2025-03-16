@@ -1,7 +1,7 @@
 #include "bot.hpp"
 
 
-std::string quotes[20] = {
+const std::string Bot::quotes[20] = {
     "The only way to do great work is to love what you do. - Steve Jobs",
     "In the middle of every difficulty lies opportunity. - Albert Einstein",
     "The future belongs to those who believe in the beauty of their dreams. - Eleanor Roosevelt",
@@ -29,6 +29,97 @@ int getRandom20()
     return rand() % 20;
 }
 
+Bot::Bot()
+{
+    registred = false;
+    srand(time(0)); // Seed random number generator
+}
+
+void Bot::setSocketFd(int fd)
+{
+    this->fd = fd;
+}
+
+bool Bot::isRegistred()
+{
+    return registred;
+}
+
+void Bot::setRegistred(bool registred)
+{
+    this->registred = registred;
+}
+
+int Bot::getSocketFd()
+{
+    return this->fd;
+}
+
+void Bot::setServerInfos(std::string ip, std::string port)
+{
+    //needs more protections here !!!
+    server_addr.sin_family = AF_INET;
+    if (port.empty())
+    {
+        std::cerr << "Port is empty" << std::endl;
+        close(fd);
+        exit(1);
+    }
+    server_addr.sin_port = htons(atoi(port.c_str()));
+    server_addr.sin_addr.s_addr = inet_addr(ip.c_str());
+}
+
+void Bot::connectToServer()
+{
+    if (connect(fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
+    {
+        std::cerr << "connect() failed" << std::endl;
+        close(fd);
+        exit(1);
+    }
+    std::cout << "Connected to server" << std::endl;
+}
+
+void Bot::checkRegistred(std::string response)
+{
+    if (response.find("464") != std::string::npos)
+    {
+        std::cerr << "Password incorrect" << std::endl;
+        close(fd);
+        exit(1);
+    }
+    else if (response.find("001") != std::string::npos)
+    {
+       std::cout << "Registered Successfully" << std::endl;
+       setRegistred(true);
+    }
+}
+
+void Bot::registerBot(std::string password)
+{
+    std::string message = "PASS " + password + "\r\n";
+    if (send(fd, message.c_str(), message.size(), 0) < 0)
+    {
+        std::cerr << "send() failed" << std::endl;
+        close(fd);
+        exit(1);
+    }
+    message = "NICK bot\r\n";
+    if (send(fd, message.c_str(), message.size(), 0) < 0)
+    {
+        std::cerr << "send() failed" << std::endl;
+        close(fd);
+        exit(1);
+    }
+    message = "USER bot 0 * :bot\r\n";
+    if (send(fd, message.c_str(), message.size(), 0) < 0)
+    {
+        std::cerr << "send() failed" << std::endl;
+        close(fd);
+        exit(1);
+    }
+}
+
 std::string trim(const std::string &str)
 {
 	size_t first = str.find_first_not_of(" \t\r\0");
@@ -48,17 +139,20 @@ std::string extractCommand(std::string message)
     return command;
 }
 
-void handle_message(std::string message, int fd)
+void Bot::handle_message(std::string message)
 {
     std::string target = message.substr(0, message.find(" ")); 
     std::string command = extractCommand(message);
     command = trim(command);
     if (command == "!HELP")
     {
-        std::string help_message = "PRIVMSG " + target + " :Hello, I am the bot. I can help you with the following commands:";
-        help_message += "[!HELP: Show this help message], ";
-        help_message += "[!TIME: Show the current time], ";
-        help_message += "[!QUOTE: Show a random quote]\r\n";
+        std::string help_message = "PRIVMSG " + target + " :Hello, I am a Utility bot. I can help you with the following commands:\r\n";
+        send(fd, help_message.c_str(), help_message.size(), 0);
+        help_message = "PRIVMSG " + target + " :!HELP: Show this help message.\r\n";
+        send(fd, help_message.c_str(), help_message.size(), 0);
+        help_message = "PRIVMSG " + target + " :!TIME: Show the current time.\r\n";
+        send(fd, help_message.c_str(), help_message.size(), 0);
+        help_message = "PRIVMSG " + target + " :!QUOTE: Show a random quote.\r\n";
         send(fd, help_message.c_str(), help_message.size(), 0);
     }
     else if (command == "!TIME")
@@ -81,80 +175,3 @@ void handle_message(std::string message, int fd)
         }
     }
 }
-
-int main(int argc, char *argv[])
-{
-    if (argc != 4)
-    {
-        std::cerr << "Usage: <ip> <port> <password>" << std::endl;
-        return 1;
-    }
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (fd < 0)
-    {
-        std::cerr << "socket() failed" << std::endl;
-        return 1;
-    }
-    struct sockaddr_in server_addr;
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(atoi(argv[2]));
-    server_addr.sin_addr.s_addr = inet_addr(argv[1]);
-    if (connect(fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
-    {
-        std::cerr << "connect() failed" << std::endl;
-        return 1;
-    }
-    std::string message = "PASS " + std::string(argv[3]) + "\r\n";
-    if (send(fd, message.c_str(), message.size(), 0) < 0)
-    {
-        std::cerr << "send() failed" << std::endl;
-        return 1;
-    }
-    sleep(1);
-    message = "NICK bot\r\n";
-    if (send(fd, message.c_str(), message.size(), 0) < 0)
-    {
-        std::cerr << "send() failed" << std::endl;
-        return 1;
-    }
-    sleep(1);
-    message = "USER bot 0 * :bot\r\n";
-    if (send(fd, message.c_str(), message.size(), 0) < 0)
-    {
-        std::cerr << "send() failed" << std::endl;
-        return 1;
-    }
-    while (true)
-    {
-        char buffer[1024];
-        int bytes_received = recv(fd, buffer, sizeof(buffer), 0);
-        std::cout << "bytes_received: " << bytes_received << std::endl;
-        if (bytes_received <= 0) {
-            std::cerr << "Connection closed" << std::endl;
-            break;
-        }
-        std::string response(buffer, bytes_received);
-        //check password
-        if (response.find("464") != std::string::npos)
-        {
-            std::cerr << "Password incorrect" << std::endl;
-            break;
-        }
-        else if (response.find("001") != std::string::npos)
-        {
-            std::cout << "Connected to server" << std::endl;
-        }
-        else
-        {
-            std::cout << "Received message: " << response << std::endl;
-            handle_message(response, fd);
-        }
-    }
-}
-
-/*
-./ircbot <ip> <port> <password>
-client
-socket();
-connect();
-*/

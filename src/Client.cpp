@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <cerrno>
 #include <cstring>
@@ -10,8 +9,8 @@
 void Client::setClientIp(int fd)
 {
 	struct sockaddr_in client_addr;
-    socklen_t client_len = sizeof(client_addr);
     char clientIp[INET_ADDRSTRLEN];
+    socklen_t client_len = sizeof(client_addr);
 
     if (getpeername(fd, (struct sockaddr *)&client_addr, &client_len) == -1)
         throw std::runtime_error("getpeername failed");
@@ -27,7 +26,6 @@ Client::Client()
 	is_NICK = false;
 	is_USER = false;
 	has_received = false;
-	Mode_in_channel = 0;
 }
 
 void Client::setSocket(int fd)
@@ -135,4 +133,8 @@ std::string Client::getBuffer() const {
 void Client::clearBuffer()
 { 
 	messageBuffer.clear();
+}
+bool Client::operator==(const Client &other) const
+{
+    return this->nickname == other.nickname;
 }

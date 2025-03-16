@@ -6,7 +6,7 @@
 /*   By: hmraizik <hmraizik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 11:50:06 by hmraizik          #+#    #+#             */
-/*   Updated: 2025/03/09 22:03:51 by hmraizik         ###   ########.fr       */
+/*   Updated: 2025/03/14 13:08:41 by hmraizik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,8 @@
 
 void broadcastMessageForNick(Client &client, Channel &channel, std::string message)
 {
-	//Extract the members of the channel
-	std::vector <Client> toSend = channel.getMembers();
 	for (size_t i=0 ; i < channel.getMembers().size(); i++)
 	{
-		//skip the client that send the message to the channel
 		if (channel.getMembers()[i].getSocket() == client.getSocket() || channel.getMembers()[i].has_received == true)
 			continue;
         else if (channel.getMembers()[i].has_received == false)
@@ -87,7 +84,7 @@ bool NickNameValide(Msj command)
 void check_Names(Client& client, Msj command, std::map<int , Client>& clients){
     if (command.args[0] == "NICK")
     {
-          if (command.args.size() < 2 || command.args[1].empty())
+        if (command.args.size() < 2 || command.args[1].empty())
         {
             client.sendMessage(ERR_NONICKNAMEGIVEN(command.args[1]));
             return ;
@@ -125,16 +122,15 @@ void check_Names(Client& client, Msj command, std::map<int , Client>& clients){
         client.setHostname(command.args[2]);
         client.setServername(command.args[3]);
         std::string realname;
-        //concatenate real name arguments
         for(size_t j = 4; j < command.args.size(); j++)
         {
             if (j ==  4 && command.args[j][0] == ':')
             {
-                realname = command.args[j].substr(1, command.args.size());//skipping ':'
+                realname = command.args[j].substr(1, command.args.size());
                 continue;
             }
-            if (realname != "")
-                realname = realname + " ";
+            if (!realname.empty())
+                realname += " ";
             realname += command.args[j];
         }
         client.setRealname(realname);
@@ -143,13 +139,11 @@ void check_Names(Client& client, Msj command, std::map<int , Client>& clients){
 }
 
 void reset_hasReceivedBool(Server& server, Client& client){
-    // std::map<std::string, Channel> channels = server.getChannels();
     std::map<std::string, Channel>::iterator it = server.getChannels().begin();
 
     while (it != server.getChannels().end()){
         if (it->second.isMember(client))
         {
-            // std::vector <Client> clients = it->second.getMembers();
             for (size_t i = 0; i < it->second.getMembers().size(); i++)
             {
                 it->second.getMembers()[i].has_received = false;
@@ -161,7 +155,7 @@ void reset_hasReceivedBool(Server& server, Client& client){
 void prodcastNickUpdated(Server &server, Client& client, std::string oldNick)
 {
     std::map<std::string, Channel>::iterator it = server.getChannels().begin();
-    std::string message = oldNick + " changed his nickname to " + client.getNickName();
+    std::string message = ":" + oldNick + "!user@host NICK :" + client.getNickName() + "\r\n";
     while (it != server.getChannels().end())
     {
         if (it->second.isMember(client))
@@ -173,6 +167,11 @@ void prodcastNickUpdated(Server &server, Client& client, std::string oldNick)
 }
 
 void UpdateNickname(Client &client, Server &server, Msj msj, std::map<int , Client>& clients){
+    if (msj.args.size() < 2)
+    {
+        client.sendMessage(ERR_NEEDMOREPARAMS(msj.args[0]));
+        return;
+    }
     if (!NickNameValide(msj))
     {
         client.sendMessage(ERR_ERRONEUSNICKNAME(msj.args[1]));
@@ -194,7 +193,7 @@ void KillNicknameCollisions(Client& client, std::map<int , Client>& clients)
     for (i = clients.begin(); i != clients.end(); ++i){
         if (i->second.getNickName() == client.getNickName() &&  i->second.getSocket() != client.getSocket())
         {
-            std::string message = "436 " + client.getNickName() + ":Nickname collision KILL\n";
+            std::string message = "436 " + client.getNickName() + ":Nickname collision KILL\r\n";
             i->second.sendMessage(message);
             close(i->second.getSocket());
         }
@@ -203,7 +202,8 @@ void KillNicknameCollisions(Client& client, std::map<int , Client>& clients)
 
 int handle_authentification(Client &client, Msj msj, Server& server)
 {
-    // Already registred
+    if (msj.args.size() < 1)
+        return 0;
     msj.args[0] = toUpper(msj.args[0]);
 
     if (client.getIs_auth() == true)
@@ -220,14 +220,12 @@ int handle_authentification(Client &client, Msj msj, Server& server)
     {
         UpdateNickname(client, server, msj, server.getClients());
     }
-    /****** trying other command before registering *************************/
     if (client.getIs_auth() == false && msj.args[0] != "PASS" && msj.args[0] != "NICK" && msj.args[0] != "USER")
     {
             client.sendMessage(ERR_NOTREGISTERED(client.getNickName()));
             return 1;
     }
-    //
-    
+
     if (!client.is_PASS && msj.args[0] != "PASS")
     {
         std::string message = "451 " + client.getNickName() + " :You have not registered - PASS required first\r\n";
@@ -243,13 +241,13 @@ int handle_authentification(Client &client, Msj msj, Server& server)
     {
         check_Names(client, msj, server.getClients());
     }
-    // verify if auth complited
+    
     if (!(client.getIs_auth()) && client.is_PASS && client.is_NICK && client.is_USER)
     {
         client.setIs_auth(true);
         KillNicknameCollisions(client, server.getClients());
 
-        client.sendMessage(RPL_WELCOME(client.getNickName(), "Welcome to the `SERVER 9DIIM`"));
+        client.sendMessage(RPL_WELCOME(client.getNickName(), "Welcome to `SERVER 9DIIM`"));
     }
     return 1;
 }

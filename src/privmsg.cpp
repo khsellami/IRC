@@ -4,7 +4,6 @@
 
 #define MAX_TARGETS 10
 
-//****Extract Receivers***********************************//
 std::vector<std::string> extract_recv(Msj msj)
 {
 	std::vector<std::string> receivers;
@@ -19,44 +18,36 @@ std::vector<std::string> extract_recv(Msj msj)
 	return receivers;
 }
 
-//****send Channel***********************************//
 void send_channel(std::string recv, Server &server, Client &client, std::string message)
 {
 	std::string channel_name;
 	channel_name = recv.substr(1);
-	// Search for channel in channels map
 	std::map<std::string, Channel>::iterator ch_it = server.getChannels().find(channel_name);
-	//****Incorrect channel name***********************************//
 	if (ch_it == server.getChannels().end()) 
 	{
 		client.sendMessage(ERR_NOSUCHCHANNEL(channel_name));
 		return;
 	}
-
-	//****channel existe***********************************//
 	Channel ch = ch_it->second;
 	if (!ch.isMember(client))
 	{
 		client.sendMessage(ERR_CANNOTSENDTOCHAN(channel_name));
 		return ;
 	}
-
-
 	std::string rpl = RPL_PRIVMSG(client.getNickName(), channel_name, message);
 	broadcastMessage(client,ch, rpl);
 
 }
 
-//****Send User***********************************//
 void send_user(std::string recv, Server &server, std::string message, Client &client)
 {
 	Client *c = server.getClientByName(recv);
 	if (c)
 	{
-		if (message.find("\001DCC") != std::string::npos) {
-			// Call your DCC handler function
+		if (message.find("\001DCC") != std::string::npos)
+		{
 			handle_dcc_message(message, client, *c, server);
-			return; // Important to return after handling
+			return;
 		}
 		else
 		{
@@ -65,13 +56,9 @@ void send_user(std::string recv, Server &server, std::string message, Client &cl
 		}
 	}
 	else
-	{
 		client.sendMessage(ERR_NOSUCHNICK(recv));
-	}
-
 }
 
-//****Extract Message***********************************//
 std::string extract_msg(Msj msj)
 {
 	std::string message;
@@ -81,8 +68,7 @@ std::string extract_msg(Msj msj)
 		message = msj.args[2];
 	return message;
 }
-//privmsg target Message
-//target privmsg Message
+
 bool handle_dcc_message(std::string message, Client &sender, Client &receiver, Server &server)
 {
 	(void)server;
@@ -108,7 +94,6 @@ void handle_privmsg(Server &server, Client &client, Msj msj)
 		client.sendMessage(ERR_NOTEXTTOSEND());
 		return ;
 	}
-	//****Extract Receivers***********************************//
 	std::vector<std::string> receivers;
 	receivers = extract_recv(msj);
 	if (receivers.size() > MAX_TARGETS)
@@ -116,14 +101,12 @@ void handle_privmsg(Server &server, Client &client, Msj msj)
 		client.sendMessage(ERR_TOOMANYTARGETS());
     	return;
 	}
-	//****Extract Message***********************************//
 	std::string message = extract_msg(msj);
 	if (message.empty())
 	{
 		client.sendMessage(ERR_NOTEXTTOSEND());
 		return ;
 	}
-	//****SEND Message***********************************//
 	for (size_t i=0; i < receivers.size(); i++)
 	{
 		if (receivers[i][0] == '#' || receivers[i][0] == '&')

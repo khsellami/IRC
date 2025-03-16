@@ -15,11 +15,7 @@ void	Server::close_allfds()
 	for (size_t i = 0; i < clients.size(); i++)
 		close(clients[i].getSocket());
 	if (serverSocket != -1)
-	{
-		std::cout << "Server <" << serverSocket << "> disconnected" << std::endl;
-		std::cout << "All clients disconnected" << std::endl;
 		close(serverSocket);
-	}
 }
 Server::Server(){}
 
@@ -78,41 +74,21 @@ std::map<int , Client>& Server::getClients()
 void	Server::run()
 {
 	int opt = 1;
-	///********************* create socket *********************************************///
-	//AF_INET ==>>> Adresse IPv4
-	//SOCK_STREAM ==>>> Mode TCP 
 	serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverSocket == -1)
-		throw "Error when creating socket\n";
-	///********************* configuration socket *********************************************///
-	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR,  (char *) &opt, sizeof(opt))) //reutiliser adresse apres fermuture
-	{
-		close(serverSocket);
-		throw "Error when set socket in reuse address\n";
-	}
-	if (fcntl(serverSocket, F_SETFL, O_NONBLOCK) == -1) //mode non-bloquant
-	{
-		close(serverSocket);
-		throw "Error when set socket in non bloquant\n";
-	}
-	///********************* bind socket *********************************************///
-	//liaison de socket a une adresse
+		throw "Error when creating socket";
+	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) 
+		throw "Error when set socket in reuse address";
+	if (fcntl(serverSocket, F_SETFL, O_NONBLOCK) == -1)
+		throw "Error when set socket in non bloquant";
 	struct sockaddr_in serverAddress;
-	serverAddress.sin_family = AF_INET; //=======>>>>>>>>> Adresse IPv4
-	serverAddress.sin_port = htons(port);//=======>>>>>>>>> port du serveur
-	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); //=======>>>>>>>>> Accepte les connexions sur tous les interfaces reseau
+	serverAddress.sin_family = AF_INET;
+	serverAddress.sin_port = htons(port);
+	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
 	if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1)
-	{
-		close(serverSocket);
-		throw "Error in bind\n";
-	}
-	///********************* socket in mode listen *********************************************///
-	//SOMAXCONN ==>>> la longueur maximale de la file d’attente des connexions entrantes
+		throw "Error in bind";
 	if (listen(serverSocket, SOMAXCONN) == -1)
-	{
-		close(serverSocket);
-		throw "Error in listen\n";
-	}
+		throw "Error in listen";
 	std::cout << "Server is listening on port " << port << '\n';
 }
 
@@ -144,105 +120,77 @@ void removeClient(Server& server, int fd)
 
 void Server::connect_client(Server &server)
 {
-	// try
-	// {
-		//add socket server to poll fds
-		struct pollfd new_poll;
-		new_poll.fd = server.getSock();
-		new_poll.events = POLLIN;
-		new_poll.revents = 0;
-		fds.push_back(new_poll);
-
-		while (Server::signal_received_flag == false)
+	struct pollfd new_poll;
+	new_poll.fd = server.getSock();
+	new_poll.events = POLLIN;
+	new_poll.revents = 0;
+	fds.push_back(new_poll);
+	while (Server::signal_received_flag == false)
+	{
+		if ((poll(&fds[0], fds.size(), 0) < 0) && (Server::signal_received_flag == false))
+			throw "Error: poll failed";
+		if (fds[0].revents & POLLIN)
 		{
-			if ((poll(&fds[0], fds.size(), 0) < 0) && (Server::signal_received_flag == false))
-			throw (("Error: poll failed"));
-			///********************* SERVER ===>> Accept de nouvelles connexions *********************************************///
-			/*
-			revents peut contenir plusieurs evenements a la fois : POLLIN | POLLERR
-			Verifie si le bit correspondant a POLLIN est active dans revents
-			*/
-			if (fds[0].revents & POLLIN)
+			struct sockaddr_in clientAddress;
+			socklen_t clientAddressLength = sizeof(clientAddress);
+			int clientSocket = accept(server.getSock(), (struct sockaddr *)&clientAddress, &clientAddressLength);
+			if (clientSocket == -1)
 			{
-				struct sockaddr_in clientAddress;
-				socklen_t clientAddressLength = sizeof(clientAddress);
-				//create socket client
-				int clientSocket = accept(server.getSock(), (struct sockaddr *)&clientAddress, &clientAddressLength);
-				if (clientSocket == -1)
+				perror("accept");
+				continue;
+			}
+			struct pollfd new_client;
+			new_client.fd = clientSocket;
+			new_client.events = POLLIN;
+			new_client.revents = 0;
+			fds.push_back(new_client);
+			Client client;
+			client.setSocket(clientSocket);
+			client.setClientIp(clientSocket);
+			client.setHost(inet_ntoa(clientAddress.sin_addr));
+			clients[clientSocket] = client;
+			std::cout << "New client connected: " << inet_ntoa(clientAddress.sin_addr) << '\n';
+		}
+		for (size_t i = 1; i < fds.size(); i++)
+		{
+			if (fds[i].revents & POLLIN)
+			{
+				char buffer[1024];
+				ssize_t bytesRead = recv(fds[i].fd, buffer, sizeof(buffer) - 1, 0);
+				if (bytesRead == -1)
 				{
-					perror("accept");
+					perror("recv");
 					continue;
 				}
-				//add le nouvel client to fds to manage it by poll
-				struct pollfd new_client;
-				new_client.fd = clientSocket;
-				new_client.events = POLLIN;
-				new_client.revents = 0;
-				fds.push_back(new_client);
-
-				//Create objet client && add it to clients
-				Client client;
-				client.setSocket(clientSocket);
-				client.setClientIp(clientSocket);
-				client.setHost(inet_ntoa(clientAddress.sin_addr));
-				clients[clientSocket] = client;
-				std::cout << "New client connected: " << inet_ntoa(clientAddress.sin_addr) << '\n';
-			}
-			///********************* CLIENTS ===>> receive message & pass it to parse_message to tarite it*********************************************///
-			for (size_t i = 1; i < fds.size(); i++)
-			{
-				if (fds[i].revents & POLLIN)
+				if (bytesRead == 0)
 				{
-					char buffer[1024];
-					ssize_t bytesRead = recv(fds[i].fd, buffer, sizeof(buffer) - 1, 0);
-					//ERROR ==>> receive data
-					if (bytesRead == -1)
-					{
-						perror("recv");
-						continue;
-					}
-					//CLIENT disconnected
-					if (bytesRead == 0)
-					{
-						std::cout << "Client " << fds[i].fd << " disconnected." << '\n';
-						removeClient(server, fds[i].fd);
-						close(fds[i].fd);
-						fds.erase(fds.begin() + i);
-						i--;
-						continue;
-					}
-					buffer[bytesRead] = '\0';
-					///////////**** handle message buffering ****///////////
-					std::string message(buffer);
-					if (message.empty())
-						continue;
-					clients[fds[i].fd].appendToBuffer(message);//add message to buffer
-
-
-					std::string clientBuffer = clients[fds[i].fd].getBuffer();
-					size_t pos = 0;
-					while ((pos = clientBuffer.find('\n', pos)) != std::string::npos)//check if the message completed by newline
-					{
-						std::string completeMessage = clientBuffer.substr(0, pos + 1);
-						std::cout << "Client " << fds[i].fd << " sent: " << completeMessage << '\n';
-						parse_message(completeMessage, clients[fds[i].fd], server);
-						clientBuffer.erase(0, pos + 1);
-						pos = 0;
-					}
-					clients[fds[i].fd].clearBuffer();
-					if (!clientBuffer.empty())
-						clients[fds[i].fd].appendToBuffer(clientBuffer);
+					std::cout << "Client " << fds[i].fd << " disconnected." << '\n';
+					removeClient(server, fds[i].fd);
+					close(fds[i].fd);
+					fds.erase(fds.begin() + i);
+					i--;
+					continue;
 				}
+				buffer[bytesRead] = '\0';
+				std::string message(buffer);
+				if (message.empty())
+					continue;
+				clients[fds[i].fd].appendToBuffer(message);
+				std::string clientBuffer = clients[fds[i].fd].getBuffer();
+				size_t pos = 0;
+				while ((pos = clientBuffer.find('\n', pos)) != std::string::npos)
+				{
+					std::string completeMessage = clientBuffer.substr(0, pos + 1);
+					std::cout << "Client " << fds[i].fd << " sent: " << completeMessage << '\n';
+					parse_message(completeMessage, clients[fds[i].fd], server);
+					clientBuffer.erase(0, pos + 1);
+					pos = 0;
+				}
+				clients[fds[i].fd].clearBuffer();
+				if (!clientBuffer.empty())
+					clients[fds[i].fd].appendToBuffer(clientBuffer);
 			}
 		}
-		close_allfds();
-	// }
-	// catch(const char *e)
-	// {
-	// 	for (size_t i = 0; i < fds.size(); i++)
-	// 		close(fds[i].fd);
-	// 	std::cout << "Exception " << e << '\n';
-	// }
-	// for (size_t i = 0; i < fds.size(); i++)
-	// 	close(fds[i].fd);
+	}
+	close_allfds();
 }

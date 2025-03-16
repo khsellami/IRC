@@ -2,11 +2,8 @@
 #define CHANNEL_HPP
 
 #include <vector>
-#include <string>
 #include <map>
 #include "Client.hpp"
-#include <algorithm>
-#define MAX_CHANNELS 10
 
 class Client;
 class Channel
@@ -45,39 +42,20 @@ class Channel
 		//setters
 		void setTopic(std::string topic);
 		void setName(std::string name);
-		bool isInvited(Client &client)
-		{
-			for (size_t i = 0; i < invited.size(); i++)
-			{
-				if (invited[i].getNickName() == client.getNickName())
-					return true;
-			}
-			return false;
-		}
+		bool isInvited(Client &client);
 		void setOperator(Client &client);
-		bool isOperator(Client &client)
-		{
-			if (!this->isMember(client))
-				return false;
-			for (size_t i = 0; i < operators.size(); i++)
-			{
-				if (operators[i].getNickName() == client.getNickName())
-					return true;
-			}
-			return false;
-		}
+		bool isOperator(Client &client);
 		bool iSInviteOnly();
         bool hasKey();
 		std::string getKey();
 		std::string getUserList();
-		bool isFull(){return (members.size() >= limit) && is_limit;}
+		bool isFull();
 		void setKey(std::string newKey);
 		void removeKey();
         void setInviteOnly(bool status);
 		void setLimit(size_t newLimit);
 		void removeLimit();
 		void broadcast(const std::string &message);
-		bool isBanned(Client &client);
 		void addMember(Client &client);
 		bool isMember(Client &client);
 		void invite(Client &client);

@@ -18,7 +18,6 @@ class Client
 		std::string realname;
 		bool 		is_auth;
 		//////////INVITE//////////
-		int Mode_in_channel;
 		std::set<std::string> joinedChannels;
 		//
 		std::string messageBuffer;
@@ -28,9 +27,7 @@ class Client
 		bool is_NICK;
 		bool is_USER;
 		bool has_received;
-		bool operator==(const Client &other) const {
-        return this->nickname == other.nickname; // Comparaison par pseudo
-    	}
+		bool operator==(const Client &other) const;
 		Client();
 		//setters
 		void setSocket(int fd);
