@@ -1,6 +1,8 @@
 
 #include "../include/header.hpp"
-
+#include <string>
+#include <sstream>
+#include <algorithm>
 
 std::string toUpper(const std::string &str)
 {
@@ -73,8 +75,6 @@ void parse_message(const std::string &msg1, Client &client, Server &server)
 		handleChannelMode(client, msj, server);
 	else if (toUpper(msj.args[0]) == "KICK")
 		handleKickCommand(client, msj, server);
-	else if (msj.args[0].find("!") != std::string::npos)
-		parse_bot_command(msj, client, server);
 	else if (!msj.args[0].empty())
 		client.sendMessage(ERR_UNKNOWNCOMMAND(msj.args[0]));
 }

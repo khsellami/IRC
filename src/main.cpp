@@ -1,6 +1,11 @@
 
 #include "../include/Server.hpp"
 #include "../include/Client.hpp"
+#include <iostream>
+#include <csignal>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
 
 int is_valid_port(const char *port_str)
 {

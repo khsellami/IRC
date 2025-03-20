@@ -2,8 +2,8 @@
 #include "../include/Client.hpp"
 #include "../include/header.hpp"
 #include "../include/Reply.hpp"
-
-
+#include <cctype>
+#include <cstdlib>
 bool isNumber(const std::string &str)
 {
     if (str.empty())
@@ -85,7 +85,7 @@ void handleChannelMode(Client &client, Msj msj, Server &server)
                 break;
             case 'l':
                 if (adding && argIndex < msj.args.size() && isNumber(msj.args[argIndex]))
-                    channel->setLimit(atoi(msj.args[argIndex++].c_str()));
+                    channel->setLimit(std::atoi(msj.args[argIndex++].c_str()));
                 else if (!adding)
                     channel->removeLimit();
                 break;

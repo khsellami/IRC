@@ -51,8 +51,19 @@ void send_user(std::string recv, Server &server, std::string message, Client &cl
 		}
 		else
 		{
-			std::string rpl= RPL_PRIVMSG(client.getNickName(), recv, message);
-			c->sendMessage(rpl);
+			//check if the target is the bot, add the nick name of the sender in the first of the message
+
+			if (recv == "bot")
+			{
+				std::string messageWithNick = client.getNickName() + " " + message;
+				c->sendMessage(messageWithNick);
+				return ;
+			}
+			else
+			{
+				std::string rpl= RPL_PRIVMSG(client.getNickName(), recv, message);
+				c->sendMessage(rpl);
+			}
 		}
 	}
 	else

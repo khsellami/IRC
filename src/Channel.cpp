@@ -1,5 +1,12 @@
 #include "../include/Channel.hpp"
-
+#include "../include/Client.hpp"
+#include "../include/Server.hpp"
+#include <ctype.h>
+#include <sstream>
+#include <algorithm>
+#include <iostream>
+#include <string>
+#include <vector>
 Channel::Channel()
 {
     is_hasKey = false;
